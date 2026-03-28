@@ -1,0 +1,108 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Support\FortoProjectStore;
+use App\Support\FortoSiteLikeStore;
+use App\Support\FortoSkillStore;
+use App\Support\FortoVisitorStore;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
+use Tests\TestCase;
+
+#[RequiresPhpExtension('pdo_sqlite')]
+class FortoDatabaseIntegrationTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_database_seeder_populates_forto_content_and_admin_tables(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->assertDatabaseCount('projects', count(config('forto.projects')));
+        $this->assertDatabaseCount('skills', count(config('forto.skills')));
+        $this->assertDatabaseCount('site_likes', count(config('forto.site_like.people')));
+        $this->assertDatabaseHas('users', [
+            'email' => config('forto.admin.email'),
+        ]);
+    }
+
+    public function test_forto_stores_and_pages_run_from_database_records(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $projectStore = app(FortoProjectStore::class);
+        $skillStore = app(FortoSkillStore::class);
+        $siteLikeStore = app(FortoSiteLikeStore::class);
+        $visitorStore = app(FortoVisitorStore::class);
+
+        $project = $projectStore->create([
+            'title' => 'MySQL Launch Project',
+            'category' => 'Showcase',
+            'summary' => 'Project baru yang harus muncul dari database.',
+            'stack' => 'Laravel, MySQL, Blade',
+            'status' => 'Live',
+            'github_url' => 'github.com/example/mysql-launch',
+        ]);
+
+        $skill = $skillStore->create([
+            'title' => 'Database Engineering',
+            'items' => 'Schema Design, Query Optimization',
+        ]);
+
+        $firstLikeSummary = $siteLikeStore->add('Visitor Tester');
+        $secondLikeSummary = $siteLikeStore->add('visitor tester');
+        $visitorSummary = $visitorStore->add('Pengunjung Baru', 'token-visitor-1');
+        $adminVisitorSummary = $visitorStore->add((string) config('forto.admin.name'), 'token-admin');
+
+        $projectStore->update($project['id'], [
+            'title' => 'MySQL Launch Project',
+            'category' => 'Showcase',
+            'summary' => 'Project baru yang sudah diperbarui dari database.',
+            'stack' => 'Laravel, MySQL, Blade, Testing',
+            'status' => 'Featured',
+            'github_url' => 'https://github.com/example/mysql-launch',
+        ]);
+
+        $this->assertDatabaseHas('projects', [
+            'id' => $project['id'],
+            'title' => 'MySQL Launch Project',
+            'status' => 'Featured',
+        ]);
+        $this->assertDatabaseHas('skills', [
+            'id' => $skill['id'],
+            'title' => 'Database Engineering',
+        ]);
+        $this->assertSame($firstLikeSummary['total'], $secondLikeSummary['total']);
+        $this->assertTrue($visitorSummary['recorded']);
+        $this->assertFalse($adminVisitorSummary['recorded']);
+
+        $this->post('/login', [
+            'email' => (string) config('forto.admin.email'),
+            'password' => (string) config('forto.admin.password'),
+        ])->assertRedirect(route('dashboard'));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Selamat Datang');
+
+        $this->get('/projects')
+            ->assertOk()
+            ->assertSee('MySQL Launch Project');
+
+        $this->get('/skills')
+            ->assertOk()
+            ->assertSee('Database Engineering');
+
+        $this->get('/community')
+            ->assertOk()
+            ->assertSee('Visitor Tester')
+            ->assertSee('Pengunjung Baru');
+
+        $this->get('/dashboard')
+            ->assertOk()
+            ->assertSee('MySQL Launch Project')
+            ->assertSee('Database Engineering');
+    }
+}

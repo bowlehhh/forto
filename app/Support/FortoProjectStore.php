@@ -2,173 +2,63 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use App\Models\Project;
+use Illuminate\Database\Eloquent\Builder;
 
 class FortoProjectStore
 {
-    private const DISK = 'local';
-    private const PATH = 'forto/projects.json';
-
     public function all(): array
     {
-        return $this->read();
+        return $this->query()
+            ->get()
+            ->map(fn (Project $project): array => $this->serialize($project))
+            ->all();
     }
 
     public function find(string $id): ?array
     {
-        foreach ($this->read() as $project) {
-            if (($project['id'] ?? null) === $id) {
-                return $project;
-            }
-        }
+        $project = $this->query()->find($id);
 
-        return null;
+        return $project ? $this->serialize($project) : null;
     }
 
     public function create(array $attributes): array
     {
-        $projects = $this->read();
-        $now = now()->toIso8601String();
-
-        $project = [
-            'id' => (string) Str::uuid(),
-            'title' => $attributes['title'],
-            'category' => $attributes['category'],
-            'summary' => $attributes['summary'],
+        $project = Project::query()->create([
+            'title' => trim((string) $attributes['title']),
+            'category' => trim((string) $attributes['category']),
+            'summary' => trim((string) $attributes['summary']),
             'stack' => $this->normalizeStack($attributes['stack'] ?? ''),
-            'status' => $attributes['status'],
+            'status' => trim((string) $attributes['status']),
             'github_url' => $this->normalizeGithubUrl($attributes['github_url'] ?? null),
-            'created_at' => $now,
-            'updated_at' => $now,
-        ];
+        ]);
 
-        array_unshift($projects, $project);
-
-        $this->write($projects);
-
-        return $project;
+        return $this->serialize($project);
     }
 
     public function update(string $id, array $attributes): ?array
     {
-        $projects = $this->read();
+        $project = Project::query()->find($id);
 
-        foreach ($projects as $index => $project) {
-            if (($project['id'] ?? null) !== $id) {
-                continue;
-            }
-
-            $projects[$index] = [
-                ...$project,
-                'title' => $attributes['title'],
-                'category' => $attributes['category'],
-                'summary' => $attributes['summary'],
-                'stack' => $this->normalizeStack($attributes['stack'] ?? ''),
-                'status' => $attributes['status'],
-                'github_url' => $this->normalizeGithubUrl($attributes['github_url'] ?? null),
-                'updated_at' => now()->toIso8601String(),
-            ];
-
-            $this->write($projects);
-
-            return $projects[$index];
+        if (! $project) {
+            return null;
         }
 
-        return null;
+        $project->fill([
+            'title' => trim((string) $attributes['title']),
+            'category' => trim((string) $attributes['category']),
+            'summary' => trim((string) $attributes['summary']),
+            'stack' => $this->normalizeStack($attributes['stack'] ?? ''),
+            'status' => trim((string) $attributes['status']),
+            'github_url' => $this->normalizeGithubUrl($attributes['github_url'] ?? null),
+        ])->save();
+
+        return $this->serialize($project->fresh());
     }
 
     public function delete(string $id): bool
     {
-        $projects = $this->read();
-        $filtered = array_values(array_filter(
-            $projects,
-            fn (array $project): bool => ($project['id'] ?? null) !== $id,
-        ));
-
-        if (count($filtered) === count($projects)) {
-            return false;
-        }
-
-        $this->write($filtered);
-
-        return true;
-    }
-
-    private function read(): array
-    {
-        $disk = Storage::disk(self::DISK);
-
-        if (! $disk->exists(self::PATH)) {
-            $seeded = $this->seed();
-            $this->write($seeded);
-
-            return $seeded;
-        }
-
-        $decoded = json_decode((string) $disk->get(self::PATH), true);
-
-        if (! is_array($decoded)) {
-            $seeded = $this->seed();
-            $this->write($seeded);
-
-            return $seeded;
-        }
-
-        $normalized = array_values(array_map(
-            fn (array $project): array => $this->normalizeProject($project),
-            array_filter($decoded, 'is_array'),
-        ));
-
-        if ($normalized !== $decoded) {
-            $this->write($normalized);
-        }
-
-        return $normalized;
-    }
-
-    private function write(array $projects): void
-    {
-        Storage::disk(self::DISK)->put(
-            self::PATH,
-            json_encode(array_values($projects), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-        );
-    }
-
-    private function seed(): array
-    {
-        $now = now()->toIso8601String();
-
-        return array_map(function (array $project) use ($now): array {
-            return [
-                'id' => (string) Str::uuid(),
-                'title' => (string) ($project['title'] ?? 'Untitled Project'),
-                'category' => (string) ($project['category'] ?? 'Project'),
-                'summary' => (string) ($project['summary'] ?? ''),
-                'stack' => $this->normalizeStack($project['stack'] ?? []),
-                'status' => (string) ($project['status'] ?? 'Draft'),
-                'github_url' => $this->normalizeGithubUrl($project['github_url'] ?? null),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }, config('forto.projects', []));
-    }
-
-    private function normalizeProject(array $project): array
-    {
-        $now = now()->toIso8601String();
-
-        return [
-            'id' => (string) ($project['id'] ?? Str::uuid()),
-            'title' => trim((string) ($project['title'] ?? 'Untitled Project')),
-            'category' => trim((string) ($project['category'] ?? 'Project')),
-            'summary' => trim((string) ($project['summary'] ?? '')),
-            'stack' => $this->normalizeStack($project['stack'] ?? []),
-            'status' => trim((string) ($project['status'] ?? 'Draft')),
-            'github_url' => $this->normalizeGithubUrl($project['github_url'] ?? null),
-            'created_at' => (string) ($project['created_at'] ?? $now),
-            'updated_at' => (string) ($project['updated_at'] ?? $now),
-        ];
+        return Project::query()->whereKey($id)->delete() > 0;
     }
 
     private function normalizeStack(array|string $stack): array
@@ -198,5 +88,25 @@ class FortoProjectStore
         }
 
         return $normalized;
+    }
+
+    private function query(): Builder
+    {
+        return Project::query()->latest('created_at');
+    }
+
+    private function serialize(Project $project): array
+    {
+        return [
+            'id' => (string) $project->getKey(),
+            'title' => trim((string) $project->title),
+            'category' => trim((string) $project->category),
+            'summary' => trim((string) $project->summary),
+            'stack' => $this->normalizeStack($project->stack ?? []),
+            'status' => trim((string) $project->status),
+            'github_url' => $this->normalizeGithubUrl($project->github_url),
+            'created_at' => optional($project->created_at)?->toIso8601String() ?? now()->toIso8601String(),
+            'updated_at' => optional($project->updated_at)?->toIso8601String() ?? now()->toIso8601String(),
+        ];
     }
 }

@@ -13,12 +13,16 @@ class PortoAdminSeeder extends Seeder
      */
     public function run(): void
     {
+        $email = (string) config('forto.admin.email');
+        $name = (string) config('forto.admin.name', 'wtp');
+        $password = (string) config('forto.admin.password');
+
         User::query()->updateOrCreate(
-            ['email' => 'winkytiopratama@gmail.com'],
+            ['email' => $email],
             [
-                'name' => 'wtp',
+                'name' => $name,
                 'email_verified_at' => now(),
-                'password' => Hash::make('winkyganteng'),
+                'password' => Hash::make($password),
             ],
         );
     }

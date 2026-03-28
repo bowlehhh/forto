@@ -2,132 +2,39 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use App\Models\Skill;
 
 class FortoSkillStore
 {
-    private const DISK = 'local';
-    private const PATH = 'forto/skills.json';
-
     public function all(): array
     {
-        return $this->read();
+        return Skill::query()
+            ->latest('created_at')
+            ->get()
+            ->map(fn (Skill $skill): array => $this->serialize($skill))
+            ->all();
     }
 
     public function find(string $id): ?array
     {
-        foreach ($this->read() as $skill) {
-            if (($skill['id'] ?? null) === $id) {
-                return $skill;
-            }
-        }
+        $skill = Skill::query()->find($id);
 
-        return null;
+        return $skill ? $this->serialize($skill) : null;
     }
 
     public function create(array $attributes): array
     {
-        $skills = $this->read();
-        $now = now()->toIso8601String();
-
-        $skill = [
-            'id' => (string) Str::uuid(),
+        $skill = Skill::query()->create([
             'title' => trim((string) $attributes['title']),
             'items' => $this->normalizeItems($attributes['items'] ?? ''),
-            'created_at' => $now,
-            'updated_at' => $now,
-        ];
+        ]);
 
-        array_unshift($skills, $skill);
-        $this->write($skills);
-
-        return $skill;
+        return $this->serialize($skill);
     }
 
     public function delete(string $id): bool
     {
-        $skills = $this->read();
-        $filtered = array_values(array_filter(
-            $skills,
-            fn (array $skill): bool => ($skill['id'] ?? null) !== $id,
-        ));
-
-        if (count($filtered) === count($skills)) {
-            return false;
-        }
-
-        $this->write($filtered);
-
-        return true;
-    }
-
-    private function read(): array
-    {
-        $disk = Storage::disk(self::DISK);
-
-        if (! $disk->exists(self::PATH)) {
-            $seeded = $this->seed();
-            $this->write($seeded);
-
-            return $seeded;
-        }
-
-        $decoded = json_decode((string) $disk->get(self::PATH), true);
-
-        if (! is_array($decoded)) {
-            $seeded = $this->seed();
-            $this->write($seeded);
-
-            return $seeded;
-        }
-
-        $normalized = array_values(array_map(
-            fn (array $skill): array => $this->normalizeSkill($skill),
-            array_filter($decoded, 'is_array'),
-        ));
-
-        if ($normalized !== $decoded) {
-            $this->write($normalized);
-        }
-
-        return $normalized;
-    }
-
-    private function write(array $skills): void
-    {
-        Storage::disk(self::DISK)->put(
-            self::PATH,
-            json_encode(array_values($skills), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-        );
-    }
-
-    private function seed(): array
-    {
-        $now = now()->toIso8601String();
-
-        return array_map(function (array $skill) use ($now): array {
-            return [
-                'id' => (string) Str::uuid(),
-                'title' => trim((string) ($skill['title'] ?? 'Skill')),
-                'items' => $this->normalizeItems($skill['items'] ?? []),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }, config('forto.skills', []));
-    }
-
-    private function normalizeSkill(array $skill): array
-    {
-        $now = now()->toIso8601String();
-
-        return [
-            'id' => (string) ($skill['id'] ?? Str::uuid()),
-            'title' => trim((string) ($skill['title'] ?? 'Skill')),
-            'items' => $this->normalizeItems($skill['items'] ?? []),
-            'created_at' => (string) ($skill['created_at'] ?? $now),
-            'updated_at' => (string) ($skill['updated_at'] ?? $now),
-        ];
+        return Skill::query()->whereKey($id)->delete() > 0;
     }
 
     private function normalizeItems(array|string $items): array
@@ -142,5 +49,16 @@ class FortoSkillStore
         );
 
         return array_values(array_unique(array_filter($normalized)));
+    }
+
+    private function serialize(Skill $skill): array
+    {
+        return [
+            'id' => (string) $skill->getKey(),
+            'title' => trim((string) $skill->title),
+            'items' => $this->normalizeItems($skill->items ?? []),
+            'created_at' => optional($skill->created_at)?->toIso8601String() ?? now()->toIso8601String(),
+            'updated_at' => optional($skill->updated_at)?->toIso8601String() ?? now()->toIso8601String(),
+        ];
     }
 }

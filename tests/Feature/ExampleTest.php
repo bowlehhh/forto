@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+#[RequiresPhpExtension('pdo_sqlite')]
 class ExampleTest extends TestCase
 {
     /**
