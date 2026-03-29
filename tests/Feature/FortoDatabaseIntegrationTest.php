@@ -8,6 +8,7 @@ use App\Support\FortoSkillStore;
 use App\Support\FortoVisitorStore;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
 
@@ -166,5 +167,40 @@ class FortoDatabaseIntegrationTest extends TestCase
         $this->assertDatabaseMissing('visitors', [
             'token' => 'popup-token-admin',
         ]);
+    }
+
+    public function test_visitor_features_fail_softly_when_visitors_table_is_not_ready_during_deploy(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Schema::dropIfExists('visitors');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Selamat Datang');
+
+        $this->get('/community')
+            ->assertOk()
+            ->assertSee('Community');
+
+        $this->post('/login', [
+            'email' => (string) config('forto.admin.email'),
+            'password' => (string) config('forto.admin.password'),
+        ])->assertRedirect(route('dashboard'));
+
+        $this->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Dashboard');
+
+        $this->postJson(route('site-visitor.store'), [
+            'name' => 'Pengunjung Deploy',
+            'token' => 'deploy-token-1',
+        ])->assertOk()
+            ->assertJson([
+                'recorded' => false,
+                'is_admin' => false,
+                'visitor_name' => 'Pengunjung Deploy',
+                'total' => 0,
+            ]);
     }
 }

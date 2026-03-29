@@ -3,35 +3,55 @@
 namespace App\Support;
 
 use App\Models\Visitor;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Throwable;
 
 class FortoVisitorStore
 {
+    private ?bool $storageAvailable = null;
+
     public function all(): array
     {
-        return Visitor::query()
-            ->orderByDesc('last_visited_at')
-            ->get()
-            ->map(fn (Visitor $visitor): array => $this->serialize($visitor))
-            ->all();
+        if (! $this->storageAvailable()) {
+            return [];
+        }
+
+        try {
+            return Visitor::query()
+                ->orderByDesc('last_visited_at')
+                ->get()
+                ->map(fn (Visitor $visitor): array => $this->serialize($visitor))
+                ->all();
+        } catch (Throwable) {
+            return [];
+        }
     }
 
     public function summary(int $limit = 5): array
     {
-        $visitors = Visitor::query()
-            ->orderByDesc('last_visited_at')
-            ->limit($limit)
-            ->get();
+        if (! $this->storageAvailable()) {
+            return $this->emptySummary();
+        }
 
-        return [
-            'total' => Visitor::query()->count(),
-            'people' => $visitors
-                ->map(fn (Visitor $visitor): array => [
-                    'name' => $visitor->name,
-                    'initials' => $this->initials($visitor->name),
-                ])
-                ->all(),
-        ];
+        try {
+            $visitors = Visitor::query()
+                ->orderByDesc('last_visited_at')
+                ->limit($limit)
+                ->get();
+
+            return [
+                'total' => Visitor::query()->count(),
+                'people' => $visitors
+                    ->map(fn (Visitor $visitor): array => [
+                        'name' => $visitor->name,
+                        'initials' => $this->initials($visitor->name),
+                    ])
+                    ->all(),
+            ];
+        } catch (Throwable) {
+            return $this->emptySummary();
+        }
     }
 
     public function add(string $name, string $token): array
@@ -40,13 +60,14 @@ class FortoVisitorStore
         $normalizedToken = trim($token);
         $adminName = trim((string) config('forto.admin.name', 'wtp'));
         $isAdmin = Str::lower($normalizedName) === Str::lower($adminName);
+        $total = $this->countVisitors();
 
         if ($normalizedName === '' || $normalizedToken === '') {
             return [
                 'recorded' => false,
                 'is_admin' => $isAdmin,
                 'visitor_name' => $normalizedName,
-                'total' => Visitor::query()->count(),
+                'total' => $total,
             ];
         }
 
@@ -55,34 +76,87 @@ class FortoVisitorStore
                 'recorded' => false,
                 'is_admin' => true,
                 'visitor_name' => $adminName,
-                'total' => Visitor::query()->count(),
+                'total' => $total,
+            ];
+        }
+
+        if (! $this->storageAvailable()) {
+            return [
+                'recorded' => false,
+                'is_admin' => false,
+                'visitor_name' => $normalizedName,
+                'total' => $total,
             ];
         }
 
         $now = now();
-        $visitor = Visitor::query()
-            ->where('token', $normalizedToken)
-            ->first();
 
-        if ($visitor) {
-            $visitor->fill([
-                'name' => $normalizedName,
-                'last_visited_at' => $now,
-            ])->save();
-        } else {
-            Visitor::query()->create([
-                'token' => $normalizedToken,
-                'name' => $normalizedName,
-                'first_visited_at' => $now,
-                'last_visited_at' => $now,
-            ]);
+        try {
+            $visitor = Visitor::query()
+                ->where('token', $normalizedToken)
+                ->first();
+
+            if ($visitor) {
+                $visitor->fill([
+                    'name' => $normalizedName,
+                    'last_visited_at' => $now,
+                ])->save();
+            } else {
+                Visitor::query()->create([
+                    'token' => $normalizedToken,
+                    'name' => $normalizedName,
+                    'first_visited_at' => $now,
+                    'last_visited_at' => $now,
+                ]);
+            }
+
+            return [
+                'recorded' => true,
+                'is_admin' => false,
+                'visitor_name' => $normalizedName,
+                'total' => $this->countVisitors(),
+            ];
+        } catch (Throwable) {
+            return [
+                'recorded' => false,
+                'is_admin' => false,
+                'visitor_name' => $normalizedName,
+                'total' => $total,
+            ];
+        }
+    }
+
+    private function storageAvailable(): bool
+    {
+        if ($this->storageAvailable !== null) {
+            return $this->storageAvailable;
         }
 
+        try {
+            return $this->storageAvailable = Schema::hasTable('visitors');
+        } catch (Throwable) {
+            return $this->storageAvailable = false;
+        }
+    }
+
+    private function countVisitors(): int
+    {
+        if (! $this->storageAvailable()) {
+            return 0;
+        }
+
+        try {
+            return Visitor::query()->count();
+        } catch (Throwable) {
+            return 0;
+        }
+    }
+
+    private function emptySummary(): array
+    {
         return [
-            'recorded' => true,
-            'is_admin' => false,
-            'visitor_name' => $normalizedName,
-            'total' => Visitor::query()->count(),
+            'total' => 0,
+            'people' => [],
         ];
     }
 
