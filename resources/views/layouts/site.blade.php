@@ -54,10 +54,6 @@
                 overflow-x: hidden;
             }
 
-            body.like-prompt-open {
-                overflow: hidden;
-            }
-
             body::before,
             body::after {
                 content: "";
@@ -814,216 +810,6 @@
                 }
             }
 
-            .like-prompt[hidden] {
-                display: none;
-            }
-
-            .like-prompt {
-                position: fixed;
-                inset: 0;
-                z-index: 70;
-                display: grid;
-                place-items: center;
-                padding: 1rem;
-            }
-
-            .like-prompt-backdrop {
-                position: absolute;
-                inset: 0;
-                border: 0;
-                background: rgba(1, 7, 10, 0.82);
-                backdrop-filter: blur(12px);
-                cursor: pointer;
-            }
-
-            .like-prompt-dialog {
-                position: relative;
-                z-index: 1;
-                width: min(34rem, 100%);
-                display: grid;
-                gap: 1rem;
-                padding: clamp(1.2rem, 2.5vw, 1.5rem);
-                border-radius: 1.6rem;
-                background:
-                    linear-gradient(145deg, rgba(12, 34, 41, 0.96), rgba(8, 23, 29, 0.92)),
-                    rgba(8, 24, 30, 0.9);
-                border: 1px solid rgba(184, 255, 223, 0.14);
-                box-shadow: 0 32px 80px rgba(0, 0, 0, 0.36);
-                overflow: hidden;
-            }
-
-            .like-prompt-dialog::before {
-                content: "";
-                position: absolute;
-                top: -4rem;
-                right: -3rem;
-                width: 11rem;
-                height: 11rem;
-                border-radius: 50%;
-                background: radial-gradient(circle, rgba(139, 233, 255, 0.2), transparent 70%);
-                filter: blur(8px);
-                pointer-events: none;
-            }
-
-            .like-prompt-icon {
-                width: 3.4rem;
-                height: 3.4rem;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 1.1rem;
-                background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(184, 255, 223, 0.12);
-                color: #9cf3ff;
-                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            }
-
-            .like-prompt-icon svg,
-            .like-prompt-action svg {
-                width: 1.4rem;
-                height: 1.4rem;
-                fill: currentColor;
-            }
-
-            .like-prompt-kicker {
-                color: var(--accent);
-                font-size: 0.78rem;
-                font-weight: 700;
-                letter-spacing: 0.18em;
-                text-transform: uppercase;
-            }
-
-            .like-prompt-dialog h2,
-            .like-prompt-dialog p,
-            .like-prompt-socialproof strong,
-            .like-prompt-socialproof span {
-                margin: 0;
-            }
-
-            .like-prompt-dialog h2 {
-                font-family: "Space Grotesk", sans-serif;
-                font-size: clamp(2rem, 5vw, 2.8rem);
-                line-height: 0.96;
-                letter-spacing: -0.05em;
-            }
-
-            .like-prompt-dialog p {
-                color: rgba(239, 250, 248, 0.76);
-                line-height: 1.8;
-            }
-
-            .like-prompt-action {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.7rem;
-                width: 100%;
-                padding: 0.95rem 1.2rem;
-                border: 1px solid rgba(184, 255, 223, 0.16);
-                border-radius: 999px;
-                background: linear-gradient(135deg, rgba(113, 239, 176, 0.96), rgba(139, 233, 255, 0.88));
-                color: #031015;
-                font-weight: 800;
-                cursor: pointer;
-                transition: transform 180ms ease, box-shadow 180ms ease;
-                box-shadow: 0 18px 34px rgba(89, 214, 160, 0.2);
-            }
-
-            .like-prompt-action:hover,
-            .like-prompt-action:focus-visible {
-                transform: translateY(-2px);
-                outline: none;
-            }
-
-            .like-prompt-action.is-liked {
-                background: rgba(8, 24, 30, 0.42);
-                color: var(--text);
-                box-shadow: none;
-            }
-
-            .like-prompt-socialproof {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 1rem;
-                padding: 0.95rem 1rem;
-                border-radius: 1.1rem;
-                background: rgba(255, 255, 255, 0.03);
-                border: 1px solid rgba(184, 255, 223, 0.08);
-            }
-
-            .like-prompt-socialproof strong {
-                display: block;
-                font-size: 1.4rem;
-            }
-
-            .like-prompt-socialproof span {
-                color: rgba(239, 250, 248, 0.62);
-                font-size: 0.9rem;
-            }
-
-            .like-avatar-row {
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-            }
-
-            .like-avatar {
-                width: 2.4rem;
-                height: 2.4rem;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                margin-left: -0.55rem;
-                border-radius: 50%;
-                border: 2px solid rgba(3, 16, 21, 0.88);
-                background: linear-gradient(135deg, rgba(113, 239, 176, 0.96), rgba(139, 233, 255, 0.88));
-                color: #031015;
-                font-size: 0.76rem;
-                font-weight: 800;
-                letter-spacing: 0.04em;
-            }
-
-            .like-avatar:first-child {
-                margin-left: 0;
-            }
-
-            .like-name-list {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.55rem;
-            }
-
-            .like-name-pill {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.58rem 0.72rem;
-                border-radius: 999px;
-                background: rgba(255, 255, 255, 0.035);
-                border: 1px solid rgba(184, 255, 223, 0.08);
-                color: rgba(239, 250, 248, 0.84);
-                font-size: 0.84rem;
-            }
-
-            .like-name-pill::before {
-                content: "";
-                width: 0.38rem;
-                height: 0.38rem;
-                border-radius: 50%;
-                background: linear-gradient(135deg, var(--accent-strong), var(--accent-cyan));
-                box-shadow: 0 0 10px rgba(139, 233, 255, 0.22);
-            }
-
-            .like-prompt-dismiss {
-                justify-self: center;
-                padding: 0;
-                border: 0;
-                background: transparent;
-                color: rgba(239, 250, 248, 0.64);
-                cursor: pointer;
-            }
-
             @media (max-width: 1024px) {
                 .header-inner,
                 .split-grid {
@@ -1221,25 +1007,6 @@
                     padding: 0.88rem 1rem;
                 }
 
-                .like-prompt {
-                    padding: 0.75rem;
-                }
-
-                .like-prompt-dialog {
-                    gap: 0.85rem;
-                    padding: 1rem;
-                    border-radius: 1.2rem;
-                }
-
-                .like-prompt-socialproof {
-                    flex-direction: column;
-                    align-items: flex-start;
-                }
-
-                .like-avatar-row {
-                    justify-content: flex-start;
-                }
-
                 .site-music-button {
                     width: 3.3rem;
                     height: 3.3rem;
@@ -1261,15 +1028,12 @@
     </head>
     @php
         $publicRouteName = request()->route()?->getName();
-        $trackablePublicRoutes = ['home', 'about', 'projects', 'contact'];
-        $shouldShowLikePrompt = isset($siteLikeSummary);
         $musicTrack = config('forto.music.track');
         $musicTrackUrl = $musicTrack ? asset(str_replace('%2F', '/', rawurlencode($musicTrack))) : null;
     @endphp
     <body
         class="{{ $bodyClass ?? '' }}"
         data-route-name="{{ $publicRouteName ?? '' }}"
-        data-public-page="{{ $shouldShowLikePrompt ? $publicRouteName : '' }}"
     >
         <header class="site-header">
             <div class="container header-inner">
@@ -1351,62 +1115,6 @@
                 </button>
 
                 <span class="site-music-label">Lagu</span>
-            </div>
-        @endif
-
-        @if ($shouldShowLikePrompt)
-            <div
-                class="like-prompt"
-                id="site-like-prompt"
-                hidden
-                data-current-page="{{ $publicRouteName }}"
-                data-required-pages='@json($trackablePublicRoutes)'
-                data-like-endpoint="{{ route('site-like.store') }}"
-                data-initial-summary='@json($siteLikeSummary)'
-            >
-                <button class="like-prompt-backdrop" type="button" data-like-close aria-label="Tutup popup like"></button>
-
-                <div class="like-prompt-dialog" role="dialog" aria-modal="true" aria-labelledby="site-like-title">
-                    <span class="like-prompt-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09A6 6 0 0 1 16.5 3C19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z"/>
-                        </svg>
-                    </span>
-                    <span class="like-prompt-kicker">Porto Reaction</span>
-                    <h2 id="site-like-title">Suka sama website ini?</h2>
-                    <p>
-                        Kamu sudah keliling halaman utama Porto. Kalau tampilannya cocok, tekan icon hati
-                        ini buat kasih like.
-                    </p>
-
-                    <button class="like-prompt-action" type="button" data-like-submit>
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09A6 6 0 0 1 16.5 3C19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z"/>
-                        </svg>
-                        <span>Like Website Ini</span>
-                    </button>
-
-                    <div class="like-prompt-socialproof">
-                        <div>
-                            <strong data-like-total>{{ $siteLikeSummary['total'] }}</strong>
-                            <span>orang sudah like</span>
-                        </div>
-
-                        <div class="like-avatar-row" data-like-avatars>
-                            @foreach ($siteLikeSummary['people'] as $person)
-                                <span class="like-avatar" title="{{ $person['name'] }}">{{ $person['initials'] }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div class="like-name-list" data-like-names>
-                        @foreach ($siteLikeSummary['people'] as $person)
-                            <span class="like-name-pill">{{ $person['name'] }}</span>
-                        @endforeach
-                    </div>
-
-                    <button class="like-prompt-dismiss" type="button" data-like-close>Nanti saja</button>
-                </div>
             </div>
         @endif
 
@@ -1503,21 +1211,13 @@
                     }
 
                     runCleanup();
-                    window.PortoLikePrompt?.closePrompt(false);
                     replacePageStyles(nextDocument);
                     main.innerHTML = nextMain.innerHTML;
                     syncBodyDataset(nextDocument.body);
                     syncNavigation(url.pathname);
                     document.title = nextDocument.title;
                     executePageScripts(nextDocument);
-
-                    if (window.PortoLikePrompt) {
-                        const promptSeed = nextDocument.getElementById('site-like-prompt');
-                        window.PortoLikePrompt.syncFromPrompt(promptSeed);
-                        window.PortoLikePrompt.recordVisit(body.dataset.routeName || '');
-                        window.PortoLikePrompt.syncSummary();
-                        window.PortoLikePrompt.syncLikeButtons();
-                    }
+                    window.PortoLikeState?.sync();
 
                     if (options.scroll !== false) {
                         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -1778,248 +1478,59 @@
                 })();
             </script>
         @endif
-        @if ($shouldShowLikePrompt)
+        @if (isset($siteLikeSummary))
             <script>
                 (() => {
-                    const prompt = document.getElementById('site-like-prompt');
+                    const totalKey = 'forto.website.like.total';
+                    const baseTotal = Number({{ (int) ($siteLikeSummary['total'] ?? 0) }});
 
-                    if (!prompt) {
-                        return;
+                    const readTotal = () => {
+                        const stored = Number.parseInt(localStorage.getItem(totalKey) || '', 10);
+
+                        if (Number.isFinite(stored)) {
+                            return Math.max(stored, baseTotal);
+                        }
+
+                        return baseTotal;
+                    };
+
+                    const writeTotal = (total) => {
+                        localStorage.setItem(totalKey, String(Math.max(0, total)));
+                    };
+
+                    const sync = () => {
+                        const total = readTotal();
+
+                        document.querySelectorAll('[data-site-like-total]').forEach((element) => {
+                            element.textContent = total;
+                        });
+
+                        document.querySelectorAll('[data-site-like-toggle]').forEach((button) => {
+                            button.setAttribute('aria-label', 'Tambah like website');
+                        });
+                    };
+
+                    if (! localStorage.getItem(totalKey)) {
+                        writeTotal(baseTotal);
                     }
 
-                    const visitedKey = 'forto.public.visited';
-                    const likedKey = 'forto.website.liked';
-                    const dismissedKey = 'forto.website.like.dismissed';
-                    const aliasKey = 'forto.website.like.alias';
-                    let currentPage = prompt.dataset.currentPage || document.body.dataset.routeName || '';
-                    let requiredPages = JSON.parse(prompt.dataset.requiredPages || '[]');
-                    let endpoint = prompt.dataset.likeEndpoint;
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                    let summary = JSON.parse(prompt.dataset.initialSummary || '{"total":0,"people":[]}');
-                    const totalElement = prompt.querySelector('[data-like-total]');
-                    const avatarsElement = prompt.querySelector('[data-like-avatars]');
-                    const namesElement = prompt.querySelector('[data-like-names]');
-                    const submitButton = prompt.querySelector('[data-like-submit]');
-                    const aliasPool = ['Alya', 'Raka', 'Nabila', 'Faris', 'Salsa', 'Arga', 'Nanda', 'Dion'];
-                    let autoOpenTimer = null;
-
-                    const renderSummary = (nextSummary = summary) => {
-                        summary = {
-                            total: Number(nextSummary?.total ?? 0),
-                            people: Array.isArray(nextSummary?.people) ? nextSummary.people : [],
-                        };
-
-                        totalElement.textContent = summary.total;
-                        avatarsElement.innerHTML = summary.people
-                            .map((person) => `<span class="like-avatar" title="${person.name}">${person.initials}</span>`)
-                            .join('');
-                        namesElement.innerHTML = summary.people
-                            .map((person) => `<span class="like-name-pill">${person.name}</span>`)
-                            .join('');
-                        document.querySelectorAll('[data-site-like-total]').forEach((element) => {
-                            element.textContent = summary.total;
-                        });
-                        document.querySelectorAll('[data-site-like-avatars]').forEach((element) => {
-                            element.innerHTML = summary.people
-                                .map((person) => `<span class="like-avatar" title="${person.name}">${person.initials}</span>`)
-                                .join('');
-                        });
-                        document.querySelectorAll('[data-site-like-names]').forEach((element) => {
-                            element.innerHTML = summary.people
-                                .map((person) => `<span class="like-name-pill">${person.name}</span>`)
-                                .join('');
-                        });
-                    };
-
-                    const readVisited = () => {
-                        try {
-                            const parsed = JSON.parse(localStorage.getItem(visitedKey) || '[]');
-                            return Array.isArray(parsed) ? parsed : [];
-                        } catch {
-                            return [];
-                        }
-                    };
-
-                    const writeVisited = (pages) => {
-                        localStorage.setItem(visitedKey, JSON.stringify([...new Set(pages)]));
-                    };
-
-                    const readLikedState = () => localStorage.getItem(likedKey) === '1';
-                    const readDismissedState = () => localStorage.getItem(dismissedKey) === '1';
-
-                    const ensureAlias = () => {
-                        const existing = localStorage.getItem(aliasKey);
-
-                        if (existing) {
-                            return existing;
-                        }
-
-                        const base = aliasPool[Math.floor(Math.random() * aliasPool.length)];
-                        const alias = `${base} ${Math.floor(10 + Math.random() * 90)}`;
-                        localStorage.setItem(aliasKey, alias);
-
-                        return alias;
-                    };
-
-                    const openPrompt = () => {
-                        prompt.hidden = false;
-                        document.body.classList.add('like-prompt-open');
-                    };
-
-                    const closePrompt = (dismiss = true) => {
-                        prompt.hidden = true;
-                        document.body.classList.remove('like-prompt-open');
-
-                        if (dismiss) {
-                            localStorage.setItem(dismissedKey, '1');
-                        }
-                    };
-
-                    const syncLikeButtons = () => {
-                        const liked = readLikedState();
-
-                        document.querySelectorAll('[data-open-like-prompt]').forEach((button) => {
-                            button.dataset.liked = liked ? 'true' : 'false';
-                        });
-
-                        if (liked) {
-                            submitButton.classList.add('is-liked');
-                            submitButton.querySelector('span').textContent = 'Kamu sudah kasih like';
-                            submitButton.disabled = false;
-                        } else {
-                            submitButton.classList.remove('is-liked');
-                            submitButton.querySelector('span').textContent = 'Like Website Ini';
-                            submitButton.disabled = false;
-                        }
-                    };
-
-                    const maybeAutoOpenPrompt = () => {
-                        const visitedPages = readVisited();
-                        const hasVisitedAllPages = requiredPages.every((page) => visitedPages.includes(page));
-
-                        if (autoOpenTimer) {
-                            window.clearTimeout(autoOpenTimer);
-                            autoOpenTimer = null;
-                        }
-
-                        if (hasVisitedAllPages && !readLikedState() && !readDismissedState()) {
-                            autoOpenTimer = window.setTimeout(openPrompt, 650);
-                        }
-                    };
-
-                    const recordVisit = (pageName) => {
-                        currentPage = pageName || currentPage;
-
-                        if (currentPage === '') {
-                            return;
-                        }
-
-                        if (requiredPages.includes(currentPage)) {
-                            const visitedPages = new Set(readVisited());
-                            visitedPages.add(currentPage);
-                            writeVisited([...visitedPages]);
-                        }
-
-                        maybeAutoOpenPrompt();
-                    };
-
-                    const syncFromPrompt = (seedPrompt) => {
-                        if (!seedPrompt) {
-                            return;
-                        }
-
-                        currentPage = seedPrompt.dataset.currentPage || currentPage;
-                        endpoint = seedPrompt.dataset.likeEndpoint || endpoint;
-
-                        try {
-                            requiredPages = JSON.parse(seedPrompt.dataset.requiredPages || '[]');
-                        } catch {
-                            requiredPages = requiredPages;
-                        }
-
-                        if (seedPrompt.dataset.initialSummary) {
-                            try {
-                                renderSummary(JSON.parse(seedPrompt.dataset.initialSummary));
-                            } catch {
-                                renderSummary(summary);
-                            }
-                        }
-                    };
-
-                    prompt.addEventListener('click', async (event) => {
-                        if (event.target.closest('[data-like-close]')) {
-                            closePrompt(true);
-                            return;
-                        }
-
-                        if (!event.target.closest('[data-like-submit]')) {
-                            return;
-                        }
-
-                        if (submitButton.disabled) {
-                            return;
-                        }
-
-                        submitButton.disabled = true;
-
-                        try {
-                            const response = await fetch(endpoint, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': csrfToken,
-                                },
-                                body: JSON.stringify({
-                                    name: ensureAlias(),
-                                }),
-                            });
-
-                            if (!response.ok) {
-                                throw new Error('Like request failed');
-                            }
-
-                            const summary = await response.json();
-                            renderSummary(summary);
-                            localStorage.setItem(likedKey, '1');
-                            localStorage.removeItem(dismissedKey);
-                            submitButton.classList.add('is-liked');
-                            submitButton.querySelector('span').textContent = 'Makasih, like kamu masuk!';
-                            syncLikeButtons();
-
-                            window.setTimeout(() => {
-                                closePrompt(false);
-                            }, 1200);
-                        } catch (error) {
-                            submitButton.disabled = false;
-                            submitButton.querySelector('span').textContent = 'Coba lagi ya';
-                        }
-                    });
-
                     document.addEventListener('click', (event) => {
-                        const openButton = event.target.closest('[data-open-like-prompt]');
+                        const button = event.target.closest('[data-site-like-toggle]');
 
-                        if (!openButton) {
+                        if (!button) {
                             return;
                         }
 
                         event.preventDefault();
-                        openPrompt();
+                        writeTotal(readTotal() + 1);
+                        sync();
                     });
 
-                    window.PortoLikePrompt = {
-                        closePrompt,
-                        openPrompt,
-                        recordVisit,
-                        renderSummary,
-                        syncFromPrompt,
-                        syncSummary: () => renderSummary(summary),
-                        syncLikeButtons,
+                    window.PortoLikeState = {
+                        sync,
                     };
 
-                    renderSummary(summary);
-                    syncLikeButtons();
-                    recordVisit(currentPage);
+                    sync();
                 })();
             </script>
         @endif

@@ -13,12 +13,6 @@ return [
         'intro' => 'Porto membantu brand dan personal portfolio tampil lebih premium lewat visual yang lebih rapi, lebih kuat, dan lebih terasa hidup.',
     ],
 
-    'admin' => [
-        'name' => env('FORTO_ADMIN_NAME', 'wtp'),
-        'email' => env('FORTO_ADMIN_EMAIL', 'winkytiopratama@gmail.com'),
-        'password' => env('FORTO_ADMIN_PASSWORD', 'winkyganteng'),
-    ],
-
     'links' => [
         'github' => env('FORTO_GITHUB_URL', 'https://github.com'),
     ],
@@ -30,14 +24,7 @@ return [
     ],
 
     'site_like' => [
-        'people' => [
-            'Alya Ramadhani',
-            'Raka Fadhil',
-            'Nadia Putri',
-            'Bima Akbar',
-            'Salsa Maharani',
-            'Dion Pratama',
-        ],
+        'default_total' => 0,
     ],
 
     'highlights' => [

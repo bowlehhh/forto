@@ -74,6 +74,11 @@
             gap: 1rem;
         }
 
+        .dashboard-static-list {
+            display: grid;
+            gap: 0.9rem;
+        }
+
         .dashboard-list-head {
             display: flex;
             flex-wrap: wrap;
@@ -171,12 +176,12 @@
                 </div>
 
                 <p class="dashboard-note">
-                    Setelah login, kamu sekarang bisa tambah, edit, dan hapus project langsung dari dashboard.
-                    Semua perubahan otomatis tampil di halaman public `Projects`.
+                    Dashboard ini sekarang dibuat lebih aman untuk deploy. Konten public mengikuti konfigurasi website,
+                    jadi tidak lagi bentrok dengan tabel content database.
                 </p>
 
                 <div class="dashboard-meta">
-                    <span>Admin: {{ $admin['name'] ?? config('forto.admin.name') }}</span>
+                    <span>Admin: {{ $admin['name'] ?? 'Admin' }}</span>
                     <span>Email: {{ $admin['email'] ?? '-' }}</span>
                     <span>Login: {{ $admin['logged_in_at'] ?? '-' }}</span>
                     <span>Total Projects: {{ count($projects) }}</span>
@@ -190,47 +195,21 @@
         <div class="container dashboard-shell">
             <div class="dashboard-column">
                 <div class="surface dashboard-card">
-                    <span class="section-kicker">Tambah Project</span>
-                    <h2>Publish project baru</h2>
-                    <p>Isi form ini lalu simpan. Project baru akan langsung masuk ke halaman public dengan popup notifikasi yang lebih rapi.</p>
-
-                    <form class="form-grid" method="POST" action="{{ route('dashboard.projects.store') }}">
-                        @csrf
-                        @include('pages.partials.project-form-fields', ['project' => null])
-
-                        <button class="button primary" type="submit">Simpan Project</button>
-                    </form>
+                    <span class="section-kicker">Status Deploy</span>
+                    <h2>Web public sekarang ikut data konfigurasi</h2>
+                    <p>
+                        Project, skill, dan konten public tidak lagi membaca tabel database tambahan.
+                        Database sekarang difokuskan untuk akun login admin saja supaya jalur deploy lebih sehat.
+                    </p>
                 </div>
 
                 <div class="surface dashboard-card">
-                    <span class="section-kicker">Tambah Skill</span>
-                    <h2>Tambahkan skill baru</h2>
-
-                    <form class="form-grid" method="POST" action="{{ route('dashboard.skills.store') }}">
-                        @csrf
-
-                        <div class="field">
-                            <label for="skill_title">Nama Skill</label>
-                            <input
-                                id="skill_title"
-                                name="title"
-                                type="text"
-                                value="{{ old('title') }}"
-                                required
-                            >
-                        </div>
-
-                        <div class="field">
-                            <label for="skill_items">Item Skill</label>
-                            <textarea
-                                id="skill_items"
-                                name="items"
-                                placeholder="Laravel, Blade, UI"
-                            >{{ old('items') }}</textarea>
-                        </div>
-
-                        <button class="button primary" type="submit">Simpan Skill</button>
-                    </form>
+                    <span class="section-kicker">Akun Admin</span>
+                    <h2>Login admin aktif</h2>
+                    <p>
+                        Akun admin dibuat lewat satu seeder default. Saat deploy, cukup jalankan migration dan seed
+                        agar akun login langsung tersedia.
+                    </p>
                 </div>
             </div>
 
@@ -247,23 +226,11 @@
                     </div>
 
                     @if (count($skills))
-                        <div class="dashboard-skills">
+                        <div class="dashboard-static-list dashboard-skills">
                             @foreach ($skills as $skill)
                                 <article class="surface dashboard-skill">
                                     <div class="dashboard-skill-top">
                                         <h3 style="margin: 0; font-size: 1.15rem;">{{ $skill['title'] }}</h3>
-
-                                        <div class="dashboard-actions">
-                                            <form
-                                                method="POST"
-                                                action="{{ route('dashboard.skills.destroy', $skill['id']) }}"
-                                                onsubmit="return confirm('Hapus skill ini dari dashboard dan halaman public?')"
-                                            >
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="button danger small" type="submit">Hapus</button>
-                                            </form>
-                                        </div>
                                     </div>
 
                                     <div class="tag-row">
@@ -278,7 +245,7 @@
                         <div class="surface dashboard-empty">
                             <h3 style="margin: 0;">Belum ada skill</h3>
                             <p style="margin-top: 0.8rem;">
-                                Skill pertama yang kamu tambah dari dashboard akan langsung muncul di halaman public.
+                                Tambahkan data skill di konfigurasi website untuk menampilkannya di halaman public.
                             </p>
                         </div>
                     @endif
@@ -294,29 +261,13 @@
                     </div>
 
                     @if (count($projects))
-                        <div class="dashboard-projects">
+                        <div class="dashboard-static-list dashboard-projects">
                             @foreach ($projects as $project)
                                 <article class="surface dashboard-project">
                                     <div class="dashboard-project-top">
                                         <div>
                                             <small>{{ $project['category'] }}</small>
                                             <h3>{{ $project['title'] }}</h3>
-                                        </div>
-
-                                        <div class="dashboard-actions">
-                                            <a class="button secondary small" href="{{ route('dashboard.projects.edit', $project['id']) }}">
-                                                Edit
-                                            </a>
-
-                                            <form
-                                                method="POST"
-                                                action="{{ route('dashboard.projects.destroy', $project['id']) }}"
-                                                onsubmit="return confirm('Hapus project ini dari dashboard dan halaman public?')"
-                                            >
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="button danger small" type="submit">Hapus</button>
-                                            </form>
                                         </div>
                                     </div>
 
@@ -336,7 +287,7 @@
                         <div class="surface dashboard-empty">
                             <h3 style="margin: 0;">Belum ada project</h3>
                             <p style="margin-top: 0.8rem;">
-                                Project pertama yang kamu tambah dari dashboard akan langsung muncul di halaman public.
+                                Tambahkan data project di konfigurasi website untuk menampilkannya di halaman public.
                             </p>
                         </div>
                     @endif

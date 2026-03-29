@@ -7,7 +7,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Hash;
-use Throwable;
 
 class AuthController extends Controller
 {
@@ -30,22 +29,12 @@ class AuthController extends Controller
         ]);
 
         $normalizedEmail = strtolower(trim($credentials['email']));
-        $user = null;
+        $user = User::query()
+            ->where('email', $normalizedEmail)
+            ->first();
 
-        try {
-            $user = User::query()
-                ->where('email', $normalizedEmail)
-                ->first();
-        } catch (Throwable) {
-            $user = null;
-        }
-
-        $fallbackEmail = strtolower((string) config('forto.admin.email'));
-        $fallbackPassword = (string) config('forto.admin.password');
-
-        $isValid = $user
-            ? Hash::check($credentials['password'], $user->password)
-            : ($normalizedEmail === $fallbackEmail && hash_equals($fallbackPassword, $credentials['password']));
+        $isValid = $user instanceof User
+            && Hash::check($credentials['password'], $user->password);
 
         if (! $isValid) {
             return back()
@@ -58,8 +47,8 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $request->session()->put('forto_admin', [
             'authenticated' => true,
-            'name' => $user?->name ?? (string) config('forto.admin.name', 'wtp'),
-            'email' => $user?->email ?? $fallbackEmail,
+            'name' => $user->name ?: 'Admin',
+            'email' => $user->email,
             'logged_in_at' => now()->format('d M Y, H:i'),
         ]);
 

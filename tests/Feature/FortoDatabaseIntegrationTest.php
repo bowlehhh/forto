@@ -2,11 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Support\FortoProjectStore;
-use App\Support\FortoSiteLikeStore;
-use App\Support\FortoSkillStore;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
 
@@ -15,67 +13,26 @@ class FortoDatabaseIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_database_seeder_populates_forto_content_and_admin_tables(): void
+    public function test_database_seeder_creates_admin_login_user(): void
     {
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertDatabaseCount('projects', count(config('forto.projects')));
-        $this->assertDatabaseCount('skills', count(config('forto.skills')));
-        $this->assertDatabaseCount('site_likes', count(config('forto.site_like.people')));
         $this->assertDatabaseHas('users', [
-            'email' => config('forto.admin.email'),
+            'email' => 'winkytiopratama@gmail.com',
+            'name' => 'Admin',
         ]);
     }
 
-    public function test_forto_stores_and_pages_run_from_database_records(): void
+    public function test_public_pages_render_from_config_without_content_tables(): void
     {
         $this->seed(DatabaseSeeder::class);
 
-        $projectStore = app(FortoProjectStore::class);
-        $skillStore = app(FortoSkillStore::class);
-        $siteLikeStore = app(FortoSiteLikeStore::class);
+        Schema::dropIfExists('projects');
+        Schema::dropIfExists('skills');
+        Schema::dropIfExists('site_likes');
 
-        $project = $projectStore->create([
-            'title' => 'MySQL Launch Project',
-            'category' => 'Showcase',
-            'summary' => 'Project baru yang harus muncul dari database.',
-            'stack' => 'Laravel, MySQL, Blade',
-            'status' => 'Live',
-            'github_url' => 'github.com/example/mysql-launch',
-        ]);
-
-        $skill = $skillStore->create([
-            'title' => 'Database Engineering',
-            'items' => 'Schema Design, Query Optimization',
-        ]);
-
-        $firstLikeSummary = $siteLikeStore->add('Like Tester');
-        $secondLikeSummary = $siteLikeStore->add('like tester');
-
-        $projectStore->update($project['id'], [
-            'title' => 'MySQL Launch Project',
-            'category' => 'Showcase',
-            'summary' => 'Project baru yang sudah diperbarui dari database.',
-            'stack' => 'Laravel, MySQL, Blade, Testing',
-            'status' => 'Featured',
-            'github_url' => 'https://github.com/example/mysql-launch',
-        ]);
-
-        $this->assertDatabaseHas('projects', [
-            'id' => $project['id'],
-            'title' => 'MySQL Launch Project',
-            'status' => 'Featured',
-        ]);
-        $this->assertDatabaseHas('skills', [
-            'id' => $skill['id'],
-            'title' => 'Database Engineering',
-        ]);
-        $this->assertSame($firstLikeSummary['total'], $secondLikeSummary['total']);
-
-        $this->post('/login', [
-            'email' => (string) config('forto.admin.email'),
-            'password' => (string) config('forto.admin.password'),
-        ])->assertRedirect(route('dashboard'));
+        $firstProject = (array) config('forto.projects.0');
+        $firstSkill = (array) config('forto.skills.0');
 
         $this->get('/')
             ->assertOk()
@@ -83,19 +40,32 @@ class FortoDatabaseIntegrationTest extends TestCase
 
         $this->get('/projects')
             ->assertOk()
-            ->assertSee('MySQL Launch Project');
+            ->assertSee((string) ($firstProject['title'] ?? ''));
 
         $this->get('/skills')
             ->assertOk()
-            ->assertSee('Database Engineering');
+            ->assertSee((string) ($firstSkill['title'] ?? ''));
 
         $this->get('/community')
             ->assertOk()
-            ->assertSee('Like Tester');
+            ->assertSee('Counter like sederhana tanpa database');
+    }
+
+    public function test_seeded_admin_can_login_and_open_dashboard(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $token = 'forto-login-token';
+
+        $this->withSession(['_token' => $token])->post('/login', [
+            '_token' => $token,
+            'email' => 'winkytiopratama@gmail.com',
+            'password' => 'winkyganteng',
+        ])->assertRedirect(route('dashboard'));
 
         $this->get('/dashboard')
             ->assertOk()
-            ->assertSee('MySQL Launch Project')
-            ->assertSee('Database Engineering');
+            ->assertSee('Login admin aktif')
+            ->assertSee((string) config('forto.projects.0.title'))
+            ->assertSee((string) config('forto.skills.0.title'));
     }
 }

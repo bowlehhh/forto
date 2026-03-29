@@ -9,7 +9,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Public content no longer uses database tables.
+        // Legacy placeholder. Public like no longer uses database tables.
     }
 
     /**

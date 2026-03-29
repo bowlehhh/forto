@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -9,7 +10,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Public content no longer uses database tables.
+        Schema::dropIfExists('site_likes');
+        Schema::dropIfExists('skills');
+        Schema::dropIfExists('projects');
     }
 
     /**
@@ -17,6 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        // Public content no longer uses database tables.
     }
 };
