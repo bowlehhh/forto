@@ -271,7 +271,7 @@
                 <div class="surface dashboard-card">
                     <span class="section-kicker">Visitor Log</span>
                     <h2 style="margin-top: 0.85rem;">Nama pengunjung yang masuk web</h2>
-                    <p>Pengunjung yang isi nama saat masuk website akan tercatat di sini. Nama admin `wtp` otomatis tidak masuk daftar.</p>
+                    <p>Pengunjung yang isi nama saat masuk website akan tercatat di sini. Nama admin `{{ config('forto.admin.name') }}` otomatis tidak masuk daftar.</p>
 
                     @if (count($visitors))
                         <div class="dashboard-visitors">

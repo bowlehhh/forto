@@ -9,6 +9,7 @@
             name="description"
             content="Porto adalah portfolio multi-page dengan halaman terpisah untuk home, about, projects, contact, dan login."
         >
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon-pt.svg') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link
@@ -1170,6 +1171,39 @@
                 }
             }
 
+            @media (max-width: 1366px) and (min-width: 721px) {
+                .site-music {
+                    right: 1rem;
+                    bottom: 1rem;
+                    gap: 0.42rem;
+                }
+
+                .site-music-button {
+                    width: 3.55rem;
+                    height: 3.55rem;
+                }
+
+                .site-music-disc {
+                    width: 1.95rem;
+                    height: 1.95rem;
+                }
+
+                .site-music-label {
+                    font-size: 0.64rem;
+                    letter-spacing: 0.16em;
+                }
+            }
+
+            @media (max-height: 860px) and (min-width: 721px) {
+                .site-music {
+                    bottom: 0.8rem;
+                }
+
+                .site-music-label {
+                    display: none;
+                }
+            }
+
             @media (max-width: 840px) {
                 .page-section {
                     padding: clamp(2.4rem, 9vw, 4rem) 0;
@@ -1970,6 +2004,61 @@
                         return token;
                     };
 
+                    const persistVisitor = async (enteredName, options = {}) => {
+                        const {
+                            closeOnSuccess = true,
+                            disableSubmit = false,
+                            showErrorOnFailure = true,
+                        } = options;
+
+                        if (disableSubmit) {
+                            submitButton.disabled = true;
+                        }
+
+                        try {
+                            const response = await fetch(endpoint, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken,
+                                },
+                                body: JSON.stringify({
+                                    name: enteredName,
+                                    token: ensureToken(),
+                                }),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Visitor request failed');
+                            }
+
+                            const payload = await response.json();
+                            localStorage.setItem(storageNameKey, payload.visitor_name || enteredName);
+                            localStorage.setItem(storageAdminKey, payload.is_admin ? '1' : '0');
+                            if (Number.isFinite(Number(payload.total))) {
+                                localStorage.setItem(storageTotalKey, String(payload.total));
+                                syncTotal(Number(payload.total));
+                            }
+
+                            if (closeOnSuccess) {
+                                closeGate();
+                            }
+
+                            return payload;
+                        } catch (error) {
+                            if (disableSubmit) {
+                                submitButton.disabled = false;
+                            }
+
+                            if (showErrorOnFailure) {
+                                showError('Gagal menyimpan nama. Coba sekali lagi ya.');
+                            }
+
+                            throw error;
+                        }
+                    };
+
                     const openGate = () => {
                         gate.hidden = false;
                         document.body.classList.add('visitor-gate-open');
@@ -2011,8 +2100,18 @@
 
                     syncTotal();
 
-                    if (readStoredName() === '') {
+                    const storedName = readStoredName();
+
+                    if (storedName === '') {
                         openGate();
+                    } else {
+                        void persistVisitor(storedName, {
+                            closeOnSuccess: false,
+                            disableSubmit: false,
+                            showErrorOnFailure: false,
+                        }).catch(() => {
+                            // Skip noisy UI errors on silent background syncs.
+                        });
                     }
 
                     form.addEventListener('submit', async (event) => {
@@ -2028,37 +2127,15 @@
                         }
 
                         hideError();
-                        submitButton.disabled = true;
 
                         try {
-                            const response = await fetch(endpoint, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': csrfToken,
-                                },
-                                body: JSON.stringify({
-                                    name: enteredName,
-                                    token: ensureToken(),
-                                }),
+                            await persistVisitor(enteredName, {
+                                closeOnSuccess: true,
+                                disableSubmit: true,
+                                showErrorOnFailure: true,
                             });
-
-                            if (!response.ok) {
-                                throw new Error('Visitor request failed');
-                            }
-
-                            const payload = await response.json();
-                            localStorage.setItem(storageNameKey, payload.visitor_name || enteredName);
-                            localStorage.setItem(storageAdminKey, payload.is_admin ? '1' : '0');
-                            if (Number.isFinite(Number(payload.total))) {
-                                localStorage.setItem(storageTotalKey, String(payload.total));
-                                syncTotal(Number(payload.total));
-                            }
-                            closeGate();
                         } catch (error) {
-                            submitButton.disabled = false;
-                            showError('Gagal menyimpan nama. Coba sekali lagi ya.');
+                            // UI error state is handled inside persistVisitor.
                         }
                     });
                 })();

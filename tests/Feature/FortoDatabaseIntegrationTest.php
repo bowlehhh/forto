@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
 
-#[RequiresPhpExtension('pdo_sqlite')]
+#[RequiresPhpExtension('pdo_mysql')]
 class FortoDatabaseIntegrationTest extends TestCase
 {
     use RefreshDatabase;
@@ -104,5 +104,67 @@ class FortoDatabaseIntegrationTest extends TestCase
             ->assertOk()
             ->assertSee('MySQL Launch Project')
             ->assertSee('Database Engineering');
+    }
+
+    public function test_site_visitor_endpoint_persists_popup_visitors_and_skips_admin_name(): void
+    {
+        $firstResponse = $this->postJson(route('site-visitor.store'), [
+            'name' => 'Pengunjung Popup',
+            'token' => 'popup-token-1',
+        ]);
+
+        $firstResponse
+            ->assertOk()
+            ->assertJson([
+                'recorded' => true,
+                'is_admin' => false,
+                'visitor_name' => 'Pengunjung Popup',
+                'total' => 1,
+            ]);
+
+        $this->assertDatabaseHas('visitors', [
+            'token' => 'popup-token-1',
+            'name' => 'Pengunjung Popup',
+        ]);
+
+        $repeatResponse = $this->postJson(route('site-visitor.store'), [
+            'name' => 'Pengunjung Popup Baru',
+            'token' => 'popup-token-1',
+        ]);
+
+        $repeatResponse
+            ->assertOk()
+            ->assertJson([
+                'recorded' => true,
+                'is_admin' => false,
+                'visitor_name' => 'Pengunjung Popup Baru',
+                'total' => 1,
+            ]);
+
+        $this->assertDatabaseCount('visitors', 1);
+        $this->assertDatabaseHas('visitors', [
+            'token' => 'popup-token-1',
+            'name' => 'Pengunjung Popup Baru',
+        ]);
+
+        $adminName = (string) config('forto.admin.name');
+
+        $adminResponse = $this->postJson(route('site-visitor.store'), [
+            'name' => strtoupper($adminName),
+            'token' => 'popup-token-admin',
+        ]);
+
+        $adminResponse
+            ->assertOk()
+            ->assertJson([
+                'recorded' => false,
+                'is_admin' => true,
+                'visitor_name' => $adminName,
+                'total' => 1,
+            ]);
+
+        $this->assertDatabaseMissing('visitors', [
+            'token' => 'popup-token-admin',
+        ]);
     }
 }

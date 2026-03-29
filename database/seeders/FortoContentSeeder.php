@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\SiteLike;
 use App\Models\Skill;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class FortoContentSeeder extends Seeder
 {
@@ -14,34 +15,56 @@ class FortoContentSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (config('forto.projects', []) as $project) {
-            Project::query()->updateOrCreate(
-                ['title' => trim((string) ($project['title'] ?? 'Untitled Project'))],
-                [
-                    'category' => trim((string) ($project['category'] ?? 'Project')),
-                    'summary' => trim((string) ($project['summary'] ?? '')),
-                    'stack' => $this->normalizeList($project['stack'] ?? []),
-                    'status' => trim((string) ($project['status'] ?? 'Draft')),
-                    'github_url' => $this->normalizeGithubUrl($project['github_url'] ?? null),
-                ],
-            );
-        }
+        DB::transaction(function (): void {
+            foreach (config('forto.projects', []) as $project) {
+                $title = trim((string) ($project['title'] ?? 'Untitled Project'));
 
-        foreach (config('forto.skills', []) as $skill) {
-            Skill::query()->updateOrCreate(
-                ['title' => trim((string) ($skill['title'] ?? 'Skill'))],
-                [
-                    'items' => $this->normalizeList($skill['items'] ?? []),
-                ],
-            );
-        }
+                if ($title === '') {
+                    continue;
+                }
 
-        foreach (config('forto.site_like.people', []) as $name) {
-            SiteLike::query()->updateOrCreate(
-                ['name' => trim((string) $name)],
-                ['liked_at' => now()],
-            );
-        }
+                Project::query()->updateOrCreate(
+                    ['title' => $title],
+                    [
+                        'category' => trim((string) ($project['category'] ?? 'Project')),
+                        'summary' => trim((string) ($project['summary'] ?? '')),
+                        'stack' => $this->normalizeList($project['stack'] ?? []),
+                        'status' => trim((string) ($project['status'] ?? 'Draft')),
+                        'github_url' => $this->normalizeGithubUrl($project['github_url'] ?? null),
+                    ],
+                );
+            }
+
+            foreach (config('forto.skills', []) as $skill) {
+                $title = trim((string) ($skill['title'] ?? 'Skill'));
+
+                if ($title === '') {
+                    continue;
+                }
+
+                Skill::query()->updateOrCreate(
+                    ['title' => $title],
+                    [
+                        'items' => $this->normalizeList($skill['items'] ?? []),
+                    ],
+                );
+            }
+
+            $seededAt = now();
+
+            foreach (config('forto.site_like.people', []) as $name) {
+                $normalizedName = trim((string) $name);
+
+                if ($normalizedName === '') {
+                    continue;
+                }
+
+                SiteLike::query()->updateOrCreate(
+                    ['name' => $normalizedName],
+                    ['liked_at' => $seededAt],
+                );
+            }
+        });
     }
 
     private function normalizeList(array|string $items): array
