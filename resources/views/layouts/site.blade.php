@@ -58,10 +58,6 @@
                 overflow: hidden;
             }
 
-            body.visitor-gate-open {
-                overflow: hidden;
-            }
-
             body::before,
             body::after {
                 content: "";
@@ -818,128 +814,6 @@
                 }
             }
 
-            .visitor-gate[hidden] {
-                display: none;
-            }
-
-            .visitor-gate {
-                position: fixed;
-                inset: 0;
-                z-index: 80;
-                display: grid;
-                place-items: center;
-                padding: 1rem;
-            }
-
-            .visitor-gate::before {
-                content: "";
-                position: absolute;
-                inset: 0;
-                background: rgba(1, 7, 10, 0.88);
-                backdrop-filter: blur(14px);
-            }
-
-            .visitor-gate-dialog {
-                position: relative;
-                z-index: 1;
-                width: min(30rem, 100%);
-                display: grid;
-                gap: 1rem;
-                padding: clamp(1.25rem, 2.8vw, 1.5rem);
-                border-radius: 1.6rem;
-                background:
-                    linear-gradient(145deg, rgba(12, 34, 41, 0.98), rgba(8, 23, 29, 0.94)),
-                    rgba(8, 24, 30, 0.9);
-                border: 1px solid rgba(184, 255, 223, 0.14);
-                box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4);
-                overflow: hidden;
-            }
-
-            .visitor-gate-dialog::before {
-                content: "";
-                position: absolute;
-                inset: auto -3rem -4rem auto;
-                width: 12rem;
-                height: 12rem;
-                border-radius: 50%;
-                background: radial-gradient(circle, rgba(113, 239, 176, 0.18), transparent 72%);
-                filter: blur(10px);
-                pointer-events: none;
-            }
-
-            .visitor-gate-kicker {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.65rem;
-                color: var(--accent);
-                font-size: 0.78rem;
-                font-weight: 700;
-                letter-spacing: 0.18em;
-                text-transform: uppercase;
-            }
-
-            .visitor-gate-kicker::before {
-                content: "";
-                width: 0.48rem;
-                height: 0.48rem;
-                border-radius: 50%;
-                background: linear-gradient(135deg, var(--accent-strong), var(--accent-cyan));
-                box-shadow: 0 0 14px rgba(139, 233, 255, 0.24);
-            }
-
-            .visitor-gate-dialog h2,
-            .visitor-gate-dialog p {
-                margin: 0;
-            }
-
-            .visitor-gate-dialog h2 {
-                font-family: "Space Grotesk", sans-serif;
-                font-size: clamp(2rem, 5vw, 2.9rem);
-                line-height: 0.96;
-                letter-spacing: -0.05em;
-            }
-
-            .visitor-gate-copy,
-            .visitor-gate-hint {
-                color: rgba(239, 250, 248, 0.76);
-                line-height: 1.8;
-            }
-
-            .visitor-gate-form {
-                display: grid;
-                gap: 0.9rem;
-            }
-
-            .visitor-gate-field {
-                display: grid;
-                gap: 0.5rem;
-            }
-
-            .visitor-gate-field span {
-                font-size: 0.84rem;
-                color: rgba(239, 250, 248, 0.84);
-            }
-
-            .visitor-gate-field input {
-                width: 100%;
-                padding: 0.95rem 1rem;
-                border-radius: 1rem;
-                border: 1px solid rgba(184, 255, 223, 0.14);
-                background: rgba(5, 19, 24, 0.9);
-                color: var(--text);
-                outline: none;
-            }
-
-            .visitor-gate-field input:focus {
-                border-color: rgba(184, 255, 223, 0.28);
-                box-shadow: 0 0 0 3px rgba(113, 239, 176, 0.12);
-            }
-
-            .visitor-gate-error {
-                color: #ffb1b1;
-                font-size: 0.86rem;
-            }
-
             .like-prompt[hidden] {
                 display: none;
             }
@@ -1351,16 +1225,6 @@
                     padding: 0.75rem;
                 }
 
-                .visitor-gate {
-                    padding: 0.75rem;
-                }
-
-                .visitor-gate-dialog {
-                    gap: 0.85rem;
-                    padding: 1rem;
-                    border-radius: 1.2rem;
-                }
-
                 .like-prompt-dialog {
                     gap: 0.85rem;
                     padding: 1rem;
@@ -1398,8 +1262,6 @@
     @php
         $publicRouteName = request()->route()?->getName();
         $trackablePublicRoutes = ['home', 'about', 'projects', 'contact'];
-        $visitorPromptRoutes = ['home', 'about', 'projects', 'contact', 'skills', 'community'];
-        $shouldShowVisitorPrompt = in_array($publicRouteName, $visitorPromptRoutes, true);
         $shouldShowLikePrompt = isset($siteLikeSummary);
         $musicTrack = config('forto.music.track');
         $musicTrackUrl = $musicTrack ? asset(str_replace('%2F', '/', rawurlencode($musicTrack))) : null;
@@ -1489,46 +1351,6 @@
                 </button>
 
                 <span class="site-music-label">Lagu</span>
-            </div>
-        @endif
-
-        @if ($shouldShowVisitorPrompt)
-            <div
-                class="visitor-gate"
-                id="site-visitor-gate"
-                hidden
-                data-visitor-endpoint="{{ route('site-visitor.store') }}"
-                data-admin-name="{{ config('forto.admin.name') }}"
-            >
-                <div class="visitor-gate-dialog" role="dialog" aria-modal="true" aria-labelledby="site-visitor-title">
-                    <span class="visitor-gate-kicker">Masuk Dulu</span>
-                    <h2 id="site-visitor-title">Tulis nama kamu sebelum masuk.</h2>
-                    <p class="visitor-gate-copy">
-                        Nama pengunjung yang masuk website akan dicatat ke dashboard admin.
-                    </p>
-
-                    <form class="visitor-gate-form" data-visitor-form>
-                        <label class="visitor-gate-field">
-                            <span>Nama pengunjung</span>
-                            <input
-                                type="text"
-                                name="name"
-                                maxlength="40"
-                                autocomplete="name"
-                                placeholder="Contoh: Raka"
-                                required
-                            >
-                        </label>
-
-                        <p class="visitor-gate-hint">
-                            Kalau kamu admin, cukup isi <strong>{{ config('forto.admin.name') }}</strong> dan nama itu tidak akan masuk dashboard.
-                        </p>
-
-                        <p class="visitor-gate-error" data-visitor-error hidden></p>
-
-                        <button class="button primary" type="submit" data-visitor-submit>Masuk Website</button>
-                    </form>
-                </div>
             </div>
         @endif
 
@@ -1688,7 +1510,6 @@
                     syncNavigation(url.pathname);
                     document.title = nextDocument.title;
                     executePageScripts(nextDocument);
-                    window.PortoVisitorGate?.syncTotal();
 
                     if (window.PortoLikePrompt) {
                         const promptSeed = nextDocument.getElementById('site-like-prompt');
@@ -1957,195 +1778,10 @@
                 })();
             </script>
         @endif
-        @if ($shouldShowVisitorPrompt)
-            <script>
-                (() => {
-                    const gate = document.getElementById('site-visitor-gate');
-
-                    if (!gate) {
-                        return;
-                    }
-
-                    const storageNameKey = 'forto.visitor.name';
-                    const storageTokenKey = 'forto.visitor.token';
-                    const storageAdminKey = 'forto.visitor.is_admin';
-                    const storageTotalKey = 'forto.visitor.total';
-                    const endpoint = gate.dataset.visitorEndpoint;
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                    const form = gate.querySelector('[data-visitor-form]');
-                    const input = form?.querySelector('input[name="name"]');
-                    const submitButton = gate.querySelector('[data-visitor-submit]');
-                    const errorElement = gate.querySelector('[data-visitor-error]');
-
-                    if (!form || !input || !submitButton || !errorElement) {
-                        return;
-                    }
-
-                    const readStoredName = () => (localStorage.getItem(storageNameKey) || '').trim();
-                    const readStoredToken = () => (localStorage.getItem(storageTokenKey) || '').trim();
-                    const createToken = () => {
-                        if (window.crypto?.randomUUID) {
-                            return window.crypto.randomUUID();
-                        }
-
-                        return `visitor-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-                    };
-
-                    const ensureToken = () => {
-                        const existing = readStoredToken();
-
-                        if (existing !== '') {
-                            return existing;
-                        }
-
-                        const token = createToken();
-                        localStorage.setItem(storageTokenKey, token);
-
-                        return token;
-                    };
-
-                    const persistVisitor = async (enteredName, options = {}) => {
-                        const {
-                            closeOnSuccess = true,
-                            disableSubmit = false,
-                            showErrorOnFailure = true,
-                        } = options;
-
-                        if (disableSubmit) {
-                            submitButton.disabled = true;
-                        }
-
-                        try {
-                            const response = await fetch(endpoint, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': csrfToken,
-                                },
-                                body: JSON.stringify({
-                                    name: enteredName,
-                                    token: ensureToken(),
-                                }),
-                            });
-
-                            if (!response.ok) {
-                                throw new Error('Visitor request failed');
-                            }
-
-                            const payload = await response.json();
-                            localStorage.setItem(storageNameKey, payload.visitor_name || enteredName);
-                            localStorage.setItem(storageAdminKey, payload.is_admin ? '1' : '0');
-                            if (Number.isFinite(Number(payload.total))) {
-                                localStorage.setItem(storageTotalKey, String(payload.total));
-                                syncTotal(Number(payload.total));
-                            }
-
-                            if (closeOnSuccess) {
-                                closeGate();
-                            }
-
-                            return payload;
-                        } catch (error) {
-                            if (disableSubmit) {
-                                submitButton.disabled = false;
-                            }
-
-                            if (showErrorOnFailure) {
-                                showError('Gagal menyimpan nama. Coba sekali lagi ya.');
-                            }
-
-                            throw error;
-                        }
-                    };
-
-                    const openGate = () => {
-                        gate.hidden = false;
-                        document.body.classList.add('visitor-gate-open');
-                        window.setTimeout(() => input.focus(), 40);
-                    };
-
-                    const closeGate = () => {
-                        gate.hidden = true;
-                        document.body.classList.remove('visitor-gate-open');
-                        window.dispatchEvent(new CustomEvent('forto:visitor-ready'));
-                    };
-
-                    const showError = (message) => {
-                        errorElement.hidden = false;
-                        errorElement.textContent = message;
-                    };
-
-                    const hideError = () => {
-                        errorElement.hidden = true;
-                        errorElement.textContent = '';
-                    };
-
-                    const syncTotal = (nextTotal = null) => {
-                        const total = nextTotal ?? Number.parseInt(localStorage.getItem(storageTotalKey) || '', 10);
-
-                        if (!Number.isFinite(total)) {
-                            return;
-                        }
-
-                        document.querySelectorAll('[data-site-visitor-total]').forEach((element) => {
-                            element.textContent = total;
-                        });
-                    };
-
-                    window.PortoVisitorGate = {
-                        syncTotal,
-                        close: closeGate,
-                    };
-
-                    syncTotal();
-
-                    const storedName = readStoredName();
-
-                    if (storedName === '') {
-                        openGate();
-                    } else {
-                        void persistVisitor(storedName, {
-                            closeOnSuccess: false,
-                            disableSubmit: false,
-                            showErrorOnFailure: false,
-                        }).catch(() => {
-                            // Skip noisy UI errors on silent background syncs.
-                        });
-                    }
-
-                    form.addEventListener('submit', async (event) => {
-                        event.preventDefault();
-
-                        const enteredName = input.value.trim();
-
-                        if (enteredName === '') {
-                            showError('Nama wajib diisi dulu ya.');
-                            input.focus();
-
-                            return;
-                        }
-
-                        hideError();
-
-                        try {
-                            await persistVisitor(enteredName, {
-                                closeOnSuccess: true,
-                                disableSubmit: true,
-                                showErrorOnFailure: true,
-                            });
-                        } catch (error) {
-                            // UI error state is handled inside persistVisitor.
-                        }
-                    });
-                })();
-            </script>
-        @endif
         @if ($shouldShowLikePrompt)
             <script>
                 (() => {
                     const prompt = document.getElementById('site-like-prompt');
-                    const visitorGate = document.getElementById('site-visitor-gate');
 
                     if (!prompt) {
                         return;
@@ -2226,10 +1862,6 @@
                     };
 
                     const openPrompt = () => {
-                        if (visitorGate && !visitorGate.hidden) {
-                            return;
-                        }
-
                         prompt.hidden = false;
                         document.body.classList.add('like-prompt-open');
                     };
@@ -2374,8 +2006,6 @@
                         event.preventDefault();
                         openPrompt();
                     });
-
-                    window.addEventListener('forto:visitor-ready', maybeAutoOpenPrompt);
 
                     window.PortoLikePrompt = {
                         closePrompt,

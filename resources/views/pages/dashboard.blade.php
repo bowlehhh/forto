@@ -92,38 +92,6 @@
             gap: 1rem;
         }
 
-        .dashboard-visitors {
-            display: grid;
-            gap: 0.85rem;
-        }
-
-        .dashboard-visitor {
-            display: grid;
-            gap: 0.32rem;
-            padding: 0.95rem 1rem;
-            border-radius: 1rem;
-            background: rgba(255, 255, 255, 0.025);
-            border: 1px solid rgba(184, 255, 223, 0.08);
-        }
-
-        .dashboard-visitor-top {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.8rem;
-        }
-
-        .dashboard-visitor strong {
-            font-size: 1rem;
-        }
-
-        .dashboard-visitor span {
-            color: rgba(239, 250, 248, 0.64);
-            font-size: 0.86rem;
-            line-height: 1.7;
-        }
-
         .dashboard-project {
             display: grid;
             gap: 1rem;
@@ -213,7 +181,6 @@
                     <span>Login: {{ $admin['logged_in_at'] ?? '-' }}</span>
                     <span>Total Projects: {{ count($projects) }}</span>
                     <span>Total Skills: {{ count($skills) }}</span>
-                    <span>Total Pengunjung: {{ count($visitors) }}</span>
                 </div>
             </div>
         </div>
@@ -268,32 +235,6 @@
             </div>
 
             <div class="dashboard-column">
-                <div class="surface dashboard-card">
-                    <span class="section-kicker">Visitor Log</span>
-                    <h2 style="margin-top: 0.85rem;">Nama pengunjung yang masuk web</h2>
-                    <p>Pengunjung yang isi nama saat masuk website akan tercatat di sini. Nama admin `{{ config('forto.admin.name') }}` otomatis tidak masuk daftar.</p>
-
-                    @if (count($visitors))
-                        <div class="dashboard-visitors">
-                            @foreach ($visitors as $visitor)
-                                <article class="dashboard-visitor">
-                                    <div class="dashboard-visitor-top">
-                                        <strong>{{ $visitor['name'] }}</strong>
-                                        <span>{{ \Illuminate\Support\Carbon::parse($visitor['first_visited_at'])->format('d M Y, H:i') }}</span>
-                                    </div>
-
-                                    <span>Terakhir aktif: {{ \Illuminate\Support\Carbon::parse($visitor['last_visited_at'])->format('d M Y, H:i') }}</span>
-                                </article>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="surface dashboard-empty" style="padding: 1.35rem;">
-                            <h3 style="margin: 0;">Belum ada pengunjung tercatat</h3>
-                            <p style="margin-top: 0.6rem;">Nama yang masuk pertama kali ke website akan muncul di sini.</p>
-                        </div>
-                    @endif
-                </div>
-
                 <div class="dashboard-list">
                     <div class="dashboard-list-head">
                         <div>

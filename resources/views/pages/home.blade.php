@@ -922,7 +922,7 @@
                     <a class="button secondary" href="{{ route('about') }}">About Me</a>
                 </div>
 
-                @if (isset($siteLikeSummary) || isset($visitorSummary))
+                @if (isset($siteLikeSummary))
                     <div class="hero-like-strip">
                         @if (isset($siteLikeSummary))
                             <span class="hero-quick-item">
@@ -941,21 +941,6 @@
                                 <span class="hero-like-meta">
                                     <strong data-site-like-total>{{ $siteLikeSummary['total'] }}</strong>
                                     <span>Like Website</span>
-                                </span>
-                            </span>
-                        @endif
-
-                        @if (isset($visitorSummary))
-                            <span class="hero-quick-item">
-                                <a class="hero-quick-link" href="{{ route('community') }}" aria-label="Buka halaman community">
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M16 11c1.66 0 2.99-1.57 2.99-3.5S17.66 4 16 4s-3 1.57-3 3.5S14.34 11 16 11Zm-8 0c1.66 0 2.99-1.57 2.99-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.96 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/>
-                                    </svg>
-                                </a>
-
-                                <span class="hero-quick-meta">
-                                    <strong data-site-visitor-total>{{ $visitorSummary['total'] }}</strong>
-                                    <span>Visitors</span>
                                 </span>
                             </span>
                         @endif

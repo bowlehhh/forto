@@ -5,12 +5,11 @@ namespace App\Http\Controllers;
 use App\Support\FortoProjectStore;
 use App\Support\FortoSiteLikeStore;
 use App\Support\FortoSkillStore;
-use App\Support\FortoVisitorStore;
 use Illuminate\Contracts\View\View;
 
 class PageController extends Controller
 {
-    public function home(FortoSiteLikeStore $siteLikeStore, FortoVisitorStore $visitorStore): View
+    public function home(FortoSiteLikeStore $siteLikeStore): View
     {
         return view('pages.home', [
             'pageTitle' => 'Home',
@@ -18,7 +17,6 @@ class PageController extends Controller
             'highlights' => config('forto.highlights'),
             'owner' => config('forto.owner'),
             'siteLikeSummary' => $siteLikeStore->summary(),
-            'visitorSummary' => $visitorStore->summary(),
         ]);
     }
 
@@ -65,20 +63,17 @@ class PageController extends Controller
         ]);
     }
 
-    public function community(FortoSiteLikeStore $siteLikeStore, FortoVisitorStore $visitorStore): View
+    public function community(FortoSiteLikeStore $siteLikeStore): View
     {
         return view('pages.community', [
             'pageTitle' => 'Community',
             'siteLikeSummary' => $siteLikeStore->summary(),
-            'visitorSummary' => $visitorStore->summary(),
             'likes' => $siteLikeStore->all(),
-            'visitors' => $visitorStore->all(),
         ]);
     }
 
     public function dashboard(
         FortoProjectStore $projectStore,
-        FortoVisitorStore $visitorStore,
         FortoSkillStore $skillStore,
     ): View
     {
@@ -86,7 +81,6 @@ class PageController extends Controller
             'pageTitle' => 'Dashboard',
             'projects' => $projectStore->all(),
             'skills' => $skillStore->all(),
-            'visitors' => $visitorStore->all(),
             'admin' => request()->session()->get('forto_admin'),
         ]);
     }

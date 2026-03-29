@@ -5,10 +5,8 @@ namespace Tests\Feature;
 use App\Support\FortoProjectStore;
 use App\Support\FortoSiteLikeStore;
 use App\Support\FortoSkillStore;
-use App\Support\FortoVisitorStore;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
 
@@ -36,7 +34,6 @@ class FortoDatabaseIntegrationTest extends TestCase
         $projectStore = app(FortoProjectStore::class);
         $skillStore = app(FortoSkillStore::class);
         $siteLikeStore = app(FortoSiteLikeStore::class);
-        $visitorStore = app(FortoVisitorStore::class);
 
         $project = $projectStore->create([
             'title' => 'MySQL Launch Project',
@@ -52,10 +49,8 @@ class FortoDatabaseIntegrationTest extends TestCase
             'items' => 'Schema Design, Query Optimization',
         ]);
 
-        $firstLikeSummary = $siteLikeStore->add('Visitor Tester');
-        $secondLikeSummary = $siteLikeStore->add('visitor tester');
-        $visitorSummary = $visitorStore->add('Pengunjung Baru', 'token-visitor-1');
-        $adminVisitorSummary = $visitorStore->add((string) config('forto.admin.name'), 'token-admin');
+        $firstLikeSummary = $siteLikeStore->add('Like Tester');
+        $secondLikeSummary = $siteLikeStore->add('like tester');
 
         $projectStore->update($project['id'], [
             'title' => 'MySQL Launch Project',
@@ -76,8 +71,6 @@ class FortoDatabaseIntegrationTest extends TestCase
             'title' => 'Database Engineering',
         ]);
         $this->assertSame($firstLikeSummary['total'], $secondLikeSummary['total']);
-        $this->assertTrue($visitorSummary['recorded']);
-        $this->assertFalse($adminVisitorSummary['recorded']);
 
         $this->post('/login', [
             'email' => (string) config('forto.admin.email'),
@@ -98,109 +91,11 @@ class FortoDatabaseIntegrationTest extends TestCase
 
         $this->get('/community')
             ->assertOk()
-            ->assertSee('Visitor Tester')
-            ->assertSee('Pengunjung Baru');
+            ->assertSee('Like Tester');
 
         $this->get('/dashboard')
             ->assertOk()
             ->assertSee('MySQL Launch Project')
             ->assertSee('Database Engineering');
-    }
-
-    public function test_site_visitor_endpoint_persists_popup_visitors_and_skips_admin_name(): void
-    {
-        $firstResponse = $this->postJson(route('site-visitor.store'), [
-            'name' => 'Pengunjung Popup',
-            'token' => 'popup-token-1',
-        ]);
-
-        $firstResponse
-            ->assertOk()
-            ->assertJson([
-                'recorded' => true,
-                'is_admin' => false,
-                'visitor_name' => 'Pengunjung Popup',
-                'total' => 1,
-            ]);
-
-        $this->assertDatabaseHas('visitors', [
-            'token' => 'popup-token-1',
-            'name' => 'Pengunjung Popup',
-        ]);
-
-        $repeatResponse = $this->postJson(route('site-visitor.store'), [
-            'name' => 'Pengunjung Popup Baru',
-            'token' => 'popup-token-1',
-        ]);
-
-        $repeatResponse
-            ->assertOk()
-            ->assertJson([
-                'recorded' => true,
-                'is_admin' => false,
-                'visitor_name' => 'Pengunjung Popup Baru',
-                'total' => 1,
-            ]);
-
-        $this->assertDatabaseCount('visitors', 1);
-        $this->assertDatabaseHas('visitors', [
-            'token' => 'popup-token-1',
-            'name' => 'Pengunjung Popup Baru',
-        ]);
-
-        $adminName = (string) config('forto.admin.name');
-
-        $adminResponse = $this->postJson(route('site-visitor.store'), [
-            'name' => strtoupper($adminName),
-            'token' => 'popup-token-admin',
-        ]);
-
-        $adminResponse
-            ->assertOk()
-            ->assertJson([
-                'recorded' => false,
-                'is_admin' => true,
-                'visitor_name' => $adminName,
-                'total' => 1,
-            ]);
-
-        $this->assertDatabaseMissing('visitors', [
-            'token' => 'popup-token-admin',
-        ]);
-    }
-
-    public function test_visitor_features_fail_softly_when_visitors_table_is_not_ready_during_deploy(): void
-    {
-        $this->seed(DatabaseSeeder::class);
-
-        Schema::dropIfExists('visitors');
-
-        $this->get('/')
-            ->assertOk()
-            ->assertSee('Selamat Datang');
-
-        $this->get('/community')
-            ->assertOk()
-            ->assertSee('Community');
-
-        $this->post('/login', [
-            'email' => (string) config('forto.admin.email'),
-            'password' => (string) config('forto.admin.password'),
-        ])->assertRedirect(route('dashboard'));
-
-        $this->get('/dashboard')
-            ->assertOk()
-            ->assertSee('Dashboard');
-
-        $this->postJson(route('site-visitor.store'), [
-            'name' => 'Pengunjung Deploy',
-            'token' => 'deploy-token-1',
-        ])->assertOk()
-            ->assertJson([
-                'recorded' => false,
-                'is_admin' => false,
-                'visitor_name' => 'Pengunjung Deploy',
-                'total' => 0,
-            ]);
     }
 }

@@ -5,7 +5,6 @@ use App\Http\Controllers\DashboardProjectController;
 use App\Http\Controllers\DashboardSkillController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SiteLikeController;
-use App\Http\Controllers\SiteVisitorController;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(PageController::class)->group(function (): void {
@@ -25,10 +24,6 @@ Route::controller(AuthController::class)->group(function (): void {
 
 Route::controller(SiteLikeController::class)->group(function (): void {
     Route::post('/site-like', 'store')->name('site-like.store');
-});
-
-Route::controller(SiteVisitorController::class)->group(function (): void {
-    Route::post('/site-visitor', 'store')->name('site-visitor.store');
 });
 
 Route::middleware('forto.auth')

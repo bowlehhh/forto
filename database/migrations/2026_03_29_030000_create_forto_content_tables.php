@@ -35,15 +35,6 @@ return new class extends Migration
             $table->timestamp('liked_at');
             $table->timestamps();
         });
-
-        Schema::create('visitors', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('token', 120)->unique();
-            $table->string('name', 40);
-            $table->timestamp('first_visited_at');
-            $table->timestamp('last_visited_at')->index();
-            $table->timestamps();
-        });
     }
 
     /**
@@ -51,7 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('visitors');
         Schema::dropIfExists('site_likes');
         Schema::dropIfExists('skills');
         Schema::dropIfExists('projects');

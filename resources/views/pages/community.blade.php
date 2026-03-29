@@ -4,7 +4,7 @@
     <style data-page-style>
         .community-metrics {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: minmax(0, 1fr);
             gap: 1rem;
             margin-top: 2rem;
         }
@@ -20,9 +20,6 @@
         }
 
         .community-shell {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.2rem;
             margin-top: 1.2rem;
         }
 
@@ -82,8 +79,7 @@
         }
 
         @media (max-width: 900px) {
-            .community-metrics,
-            .community-shell {
+            .community-metrics {
                 grid-template-columns: 1fr;
             }
         }
@@ -98,11 +94,6 @@
 
             <div class="community-metrics">
                 <article class="surface community-metric">
-                    <span class="section-kicker">Visitors</span>
-                    <strong data-site-visitor-total>{{ $visitorSummary['total'] }}</strong>
-                </article>
-
-                <article class="surface community-metric">
                     <span class="section-kicker">Likes</span>
                     <strong data-site-like-total>{{ $siteLikeSummary['total'] }}</strong>
                 </article>
@@ -110,30 +101,12 @@
 
             <div class="community-shell">
                 <article class="surface">
-                    <span class="section-kicker">Visitors</span>
-                    <div class="community-list" style="margin-top: 1.2rem;">
-                        @forelse ($visitors as $visitor)
-                            <div class="community-item">
-                                <div class="community-item-main">
-                                    <span class="community-avatar">{{ \Illuminate\Support\Str::of($visitor['name'])->explode(' ')->filter()->take(2)->map(fn ($part) => \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($part, 0, 1)))->implode('') }}</span>
-                                    <div>
-                                        <strong>{{ $visitor['name'] }}</strong>
-                                        <span>Visitor</span>
-                                    </div>
-                                </div>
-
-                                <span class="community-item-time">{{ \Illuminate\Support\Carbon::parse($visitor['last_visited_at'])->format('d M Y') }}</span>
-                            </div>
-                        @empty
-                            <div class="community-item">
-                                <strong>Belum ada data</strong>
-                            </div>
-                        @endforelse
-                    </div>
-                </article>
-
-                <article class="surface">
                     <span class="section-kicker">Likes</span>
+                    <h2 style="margin: 0.85rem 0 0;">Apresiasi yang masuk ke website</h2>
+                    <p style="margin: 0.65rem 0 0; color: rgba(239, 250, 248, 0.72); line-height: 1.8;">
+                        Halaman ini sekarang fokus menampilkan like yang masuk dari pengunjung.
+                    </p>
+
                     <div class="community-list" style="margin-top: 1.2rem;">
                         @forelse ($likes as $like)
                             <div class="community-item">
