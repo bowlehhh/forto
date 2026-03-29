@@ -47,9 +47,9 @@
             <div class="community-shell">
                 <article class="surface">
                     <span class="section-kicker">Likes</span>
-                    <h2 style="margin: 0.85rem 0 0;">Counter like sederhana tanpa database</h2>
+                    <h2 style="margin: 0.85rem 0 0;">Like satu kali per browser tanpa database</h2>
                     <p style="margin: 0.65rem 0 0; color: rgba(239, 250, 248, 0.72); line-height: 1.8;">
-                        Tombol like sekarang hanya menghitung klik. Setiap tombol love ditekan, angkanya langsung bertambah tanpa tabel like, tanpa nama pengunjung, dan tanpa proses database tambahan.
+                        Tombol like sekarang hanya bisa dipakai satu kali per browser. Setelah pengunjung menekan tombol love, jumlah like bertambah sekali lalu tersimpan di browser tanpa database.
                     </p>
                 </article>
             </div>

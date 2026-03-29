@@ -366,6 +366,153 @@
                 font-size: 0.92rem;
             }
 
+            .confirm-modal[hidden] {
+                display: none;
+            }
+
+            .confirm-modal {
+                position: fixed;
+                inset: 0;
+                z-index: 80;
+                display: grid;
+                place-items: center;
+                padding: 1.25rem;
+            }
+
+            .confirm-modal.is-open .confirm-modal-backdrop {
+                opacity: 1;
+            }
+
+            .confirm-modal.is-open .confirm-modal-panel {
+                opacity: 1;
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            .confirm-modal-backdrop {
+                position: absolute;
+                inset: 0;
+                background:
+                    radial-gradient(circle at top, rgba(139, 233, 255, 0.08), transparent 32%),
+                    rgba(3, 16, 21, 0.78);
+                backdrop-filter: blur(10px);
+                opacity: 0;
+                transition: opacity 180ms ease;
+            }
+
+            .confirm-modal-panel {
+                position: relative;
+                z-index: 1;
+                width: min(28rem, calc(100vw - 2rem));
+                padding: 1.45rem;
+                border-radius: 1.6rem;
+                background:
+                    linear-gradient(155deg, rgba(14, 39, 46, 0.96), rgba(8, 24, 30, 0.92)),
+                    rgba(8, 24, 30, 0.9);
+                border: 1px solid rgba(184, 255, 223, 0.14);
+                box-shadow:
+                    0 36px 68px rgba(0, 0, 0, 0.32),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+                display: grid;
+                gap: 1rem;
+                opacity: 0;
+                transform: translate3d(0, 12px, 0) scale(0.98);
+                transition: opacity 180ms ease, transform 180ms ease;
+                overflow: hidden;
+            }
+
+            .confirm-modal-panel::before {
+                content: "";
+                position: absolute;
+                inset: 0 auto auto 0;
+                width: 100%;
+                height: 1px;
+                background: linear-gradient(90deg, rgba(184, 255, 223, 0.42), rgba(139, 233, 255, 0.12), transparent);
+            }
+
+            .confirm-modal-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 1rem;
+            }
+
+            .confirm-modal-kicker {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.55rem;
+                color: var(--accent);
+                font-size: 0.74rem;
+                font-weight: 700;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+            }
+
+            .confirm-modal-kicker::before {
+                content: "";
+                width: 0.55rem;
+                height: 0.55rem;
+                border-radius: 50%;
+                background: linear-gradient(135deg, var(--accent-strong), var(--accent-cyan));
+                box-shadow: 0 0 14px rgba(113, 239, 176, 0.34);
+            }
+
+            .confirm-modal-close {
+                width: 2.6rem;
+                height: 2.6rem;
+                min-width: 0;
+                padding: 0;
+                border-radius: 50%;
+            }
+
+            .confirm-modal-copy {
+                display: grid;
+                gap: 0.7rem;
+            }
+
+            .confirm-modal-copy h2 {
+                margin: 0;
+                font-family: "Space Grotesk", sans-serif;
+                font-size: clamp(1.45rem, 3vw, 1.9rem);
+                line-height: 0.96;
+                letter-spacing: -0.05em;
+            }
+
+            .confirm-modal-copy p {
+                margin: 0;
+                color: rgba(239, 250, 248, 0.76);
+                line-height: 1.8;
+            }
+
+            .confirm-modal-actions {
+                display: flex;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: 0.7rem;
+            }
+
+            @media (max-width: 640px) {
+                .confirm-modal {
+                    padding: 1rem;
+                    align-items: end;
+                }
+
+                .confirm-modal-panel {
+                    width: 100%;
+                    padding: 1.2rem;
+                    border-radius: 1.35rem;
+                }
+
+                .confirm-modal-actions {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                }
+
+                .confirm-modal-actions .button {
+                    width: 100%;
+                    min-width: 0;
+                }
+            }
+
             @keyframes toastIn {
                 to {
                     opacity: 1;
@@ -1084,6 +1231,40 @@
             &copy; {{ now()->year }} {{ strtoupper(config('forto.brand.name')) }}. ALL RIGHTS RESERVED.
         </footer>
 
+        <div class="confirm-modal" data-confirm-modal hidden>
+            <div class="confirm-modal-backdrop" data-confirm-cancel></div>
+
+            <div
+                class="confirm-modal-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="confirm-modal-title"
+                aria-describedby="confirm-modal-message"
+            >
+                <div class="confirm-modal-head">
+                    <span class="confirm-modal-kicker">Konfirmasi</span>
+                    <button
+                        class="button ghost small confirm-modal-close"
+                        type="button"
+                        data-confirm-cancel
+                        aria-label="Tutup popup konfirmasi"
+                    >
+                        X
+                    </button>
+                </div>
+
+                <div class="confirm-modal-copy">
+                    <h2 id="confirm-modal-title">Hapus data ini?</h2>
+                    <p id="confirm-modal-message">Aksi ini akan menghapus data dari dashboard.</p>
+                </div>
+
+                <div class="confirm-modal-actions">
+                    <button class="button secondary small" type="button" data-confirm-cancel>Batal</button>
+                    <button class="button danger small" type="button" data-confirm-submit>Hapus</button>
+                </div>
+            </div>
+        </div>
+
         @if ($musicTrackUrl)
             <div class="site-music" data-site-music>
                 <audio
@@ -1344,6 +1525,91 @@
                 };
             })();
         </script>
+        <script>
+            (() => {
+                const modal = document.querySelector('[data-confirm-modal]');
+                const titleElement = modal?.querySelector('#confirm-modal-title');
+                const messageElement = modal?.querySelector('#confirm-modal-message');
+                const submitButton = modal?.querySelector('[data-confirm-submit]');
+                const cancelButtons = modal?.querySelectorAll('[data-confirm-cancel]') || [];
+                let activeForm = null;
+                let lastFocusedElement = null;
+
+                if (!modal || !titleElement || !messageElement || !submitButton) {
+                    return;
+                }
+
+                const closeModal = () => {
+                    modal.classList.remove('is-open');
+                    modal.hidden = true;
+                    document.body.style.removeProperty('overflow');
+                    activeForm = null;
+
+                    if (lastFocusedElement instanceof HTMLElement) {
+                        lastFocusedElement.focus({ preventScroll: true });
+                    }
+                };
+
+                const openModal = (form) => {
+                    activeForm = form;
+                    lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+                    titleElement.textContent = form.dataset.confirmTitle || 'Konfirmasi aksi';
+                    messageElement.textContent = form.dataset.confirmMessage || 'Lanjutkan aksi ini?';
+                    submitButton.textContent = form.dataset.confirmAction || 'Lanjutkan';
+
+                    modal.hidden = false;
+                    document.body.style.overflow = 'hidden';
+
+                    requestAnimationFrame(() => {
+                        modal.classList.add('is-open');
+                        submitButton.focus({ preventScroll: true });
+                    });
+                };
+
+                document.addEventListener('submit', (event) => {
+                    const form = event.target;
+
+                    if (!(form instanceof HTMLFormElement) || !form.matches('[data-confirm-message]')) {
+                        return;
+                    }
+
+                    if (form.dataset.confirmBypass === '1') {
+                        delete form.dataset.confirmBypass;
+                        return;
+                    }
+
+                    event.preventDefault();
+                    openModal(form);
+                });
+
+                submitButton.addEventListener('click', () => {
+                    if (!(activeForm instanceof HTMLFormElement)) {
+                        closeModal();
+                        return;
+                    }
+
+                    activeForm.dataset.confirmBypass = '1';
+                    closeModal();
+                    HTMLFormElement.prototype.submit.call(activeForm);
+                });
+
+                cancelButtons.forEach((button) => {
+                    button.addEventListener('click', closeModal);
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (modal.hidden) {
+                        return;
+                    }
+
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        closeModal();
+                    }
+                });
+            })();
+        </script>
 
         <div id="page-script-stack" hidden>
             @stack('scripts')
@@ -1481,8 +1747,10 @@
         @if (isset($siteLikeSummary))
             <script>
                 (() => {
+                    const likedKey = 'forto.website.liked';
                     const totalKey = 'forto.website.like.total';
                     const baseTotal = Number({{ (int) ($siteLikeSummary['total'] ?? 0) }});
+                    const readLikedState = () => localStorage.getItem(likedKey) === '1';
 
                     const readTotal = () => {
                         const stored = Number.parseInt(localStorage.getItem(totalKey) || '', 10);
@@ -1500,13 +1768,20 @@
 
                     const sync = () => {
                         const total = readTotal();
+                        const liked = readLikedState();
 
                         document.querySelectorAll('[data-site-like-total]').forEach((element) => {
                             element.textContent = total;
                         });
 
                         document.querySelectorAll('[data-site-like-toggle]').forEach((button) => {
-                            button.setAttribute('aria-label', 'Tambah like website');
+                            button.dataset.liked = liked ? 'true' : 'false';
+                            button.disabled = liked;
+                            button.setAttribute('aria-pressed', liked ? 'true' : 'false');
+                            button.setAttribute(
+                                'aria-label',
+                                liked ? 'Like website sudah dipakai di browser ini' : 'Tambah like website',
+                            );
                         });
                     };
 
@@ -1522,6 +1797,13 @@
                         }
 
                         event.preventDefault();
+
+                        if (readLikedState()) {
+                            sync();
+                            return;
+                        }
+
+                        localStorage.setItem(likedKey, '1');
                         writeTotal(readTotal() + 1);
                         sync();
                     });

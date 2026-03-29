@@ -165,6 +165,22 @@
             outline: none;
         }
 
+        .hero-like-trigger[data-liked="true"] {
+            background: linear-gradient(135deg, rgba(113, 239, 176, 0.96), rgba(139, 233, 255, 0.88));
+            color: #031015;
+            border-color: transparent;
+            box-shadow: 0 18px 36px rgba(89, 214, 160, 0.2);
+        }
+
+        .hero-like-trigger[data-liked="true"]:hover,
+        .hero-like-trigger[data-liked="true"]:focus-visible {
+            transform: none;
+        }
+
+        .hero-like-trigger:disabled {
+            cursor: default;
+        }
+
         .hero-like-trigger:active {
             transform: scale(0.96);
             background: linear-gradient(135deg, rgba(113, 239, 176, 0.96), rgba(139, 233, 255, 0.88));
@@ -931,6 +947,8 @@
                                     class="hero-like-trigger"
                                     type="button"
                                     data-site-like-toggle
+                                    data-liked="false"
+                                    aria-pressed="false"
                                     aria-label="Tambah like website"
                                 >
                                     <svg viewBox="0 0 24 24">

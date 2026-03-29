@@ -353,7 +353,7 @@
                 <article class="surface" style="grid-column: 1 / -1; text-align: center;">
                     <h3 style="margin: 0;">Belum ada project public</h3>
                     <p style="margin-top: 0.9rem;">
-                        Isi project public di konfigurasi website, lalu daftar project akan tampil di sini.
+                        Tambahkan project dari dashboard admin, lalu daftar project akan tampil di sini.
                     </p>
                 </article>
             @endforelse
